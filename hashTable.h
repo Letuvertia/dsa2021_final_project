@@ -1,13 +1,77 @@
 #include "api.h"
-#include "tools.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
 
-#define HASH_M 50000 // unsigned long (4 bytes) * HASH_M= memory used for one mail
+#define HASH_M 100 // unsigned long (4 bytes) * HASH_M= memory used for one mail
 #define HASH_S 1
 #define S_ENLARGE_RATIO 3
 
+#define Q_RabinKarp 59650000
+#define D_RabinKarp 36
+
+// ======= tools =======
+
+char toNumber(char c) {
+    if ('0' <= c && c <= '9') {
+        return c - '0';
+    }
+    if ('A' <= c && c <= 'Z') {
+        return c - 'A' + 10;
+    }
+    return c - 'a' + 10;
+}
+
+
+int isAlphaNumeric (char c){
+	// 0-9 48-57
+	if (48 <= c && c <= 57)
+		return 1;
+	// A-Z 65-90
+	if (65 <= c && c <= 90)
+		return 1;
+	// a-z 97-122
+	if (97 <= c && c <= 122)
+		return 1;
+	return 0;
+}
+
+
+bool isDelimiter(char c) {
+    if (('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || ('0' <= c && c <= '9')) {
+        return false;
+    }
+    return true;
+}
+
+
+int hashString(char *s, int len) {
+    int ans = 0;
+    for (int i = 0; i < len; i++) {
+        ans = (ans * D_RabinKarp + toNumber(s[i])) % Q_RabinKarp;
+    }
+    return ans;
+}
+
+
+// (Jun): I found hash function samples from 
+// 		  http://www.cse.yorku.ca/~oz/hash.html
+unsigned int hashString_inChain (char *s_begin, int s_len){
+	// used "within a chain". That is, used only when different string 
+	// is hashed into the same value by stringHash (written in anthony.h) 
+	unsigned long hash = 5381;
+    for (int s_ctr=0; s_ctr<s_len; s_ctr++){
+        hash = ((hash << 5) + hash) + s_begin[s_ctr]; /* hash * 33 + c */
+    }
+	
+	unsigned int return_hash = hash % (INT_MAX*2+1); // return int
+	return return_hash;
+}
+
+
+
+
+// ======= hash table functions =======
 
 typedef struct HashTable {
     // chaining hash table
@@ -64,25 +128,40 @@ void hashTable_hashParagraph(HashTable *hashTable, char *para) {
 
 
 void hashTable_pushToken(HashTable *hashTable, char *s_begin, int s_len) {
+	//fprintf(stderr, "push Token: ");
+	//for (int i=0; i<s_len; i++)
+	//	fprintf(stderr, "%c", s_begin[i]);
+	//fprintf(stderr, "\n");
+
+	// check whether the token repeated
 	int s_hash = hashString(s_begin, s_len) % HASH_M;
+	unsigned int s_hash_inChain = hashString_inChain(s_begin, s_len);
+	for (int i=0; i<hashTable->chainElementsN[s_hash]; i++)
+		if (hashTable->chains[s_hash][i] == s_hash_inChain){
+			//fprintf(stderr, "repeated\n");
+			return;
+		}
+
+	// enlarge
 	if (hashTable->chainCapacity[s_hash] == hashTable->chainElementsN[s_hash]) {
-		// enlarge
 		unsigned char newCapacity = (hashTable->chainElementsN[s_hash] * S_ENLARGE_RATIO > (CHAR_MAX*2+1))? 
 			(CHAR_MAX*2+1) : hashTable->chainElementsN[s_hash] * S_ENLARGE_RATIO;
 		hashTable->chains[s_hash] 
 			= (unsigned int *) realloc(hashTable->chains[s_hash], sizeof(unsigned int)*newCapacity);
+		//fprintf(stderr, "enlarge chain from %d to %d\n", hashTable->chainCapacity[s_hash], newCapacity);
 		hashTable->chainCapacity[s_hash] = newCapacity;
 	}
 
-	hashTable->chains[s_hash][hashTable->chainElementsN[s_hash]] = hashString_inChain(s_begin, s_len);
+	hashTable->chains[s_hash][hashTable->chainElementsN[s_hash]] = s_hash_inChain;
 	hashTable->chainElementsN[s_hash]++;
+	//fprintf(stderr, "s_hash: %d, s_hash_inChain: %u\n", s_hash, s_hash_inChain);
 }
 
 
 bool hashTable_findToken_inputString(HashTable *hashTable, char *s_begin, int s_len) {
     int s_hash = hashString(s_begin, s_len) % HASH_M;
     unsigned int s_hash_inChain = hashString_inChain(s_begin, s_len);
-    hashTable_findToken_inputHash(hashTable, s_hash, s_hash_inChain);
+    return hashTable_findToken_inputHash(hashTable, s_hash, s_hash_inChain);
 }
 
 
