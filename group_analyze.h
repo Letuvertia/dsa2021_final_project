@@ -1,8 +1,10 @@
+#include "api.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include "api.h"
+
+
 int LARGEST_GROUP_SIZE = 0;
 int GROUP_NUMBER = 0;
 /*
@@ -18,7 +20,7 @@ typedef struct DJset{
 set DJ[5000];
 bool IsSet[5000] = {};
 int ans[2];
-set *findset(char *a);
+set *findSet(char *a);
 int hash_GroupAnalyze(char *a);
 void init_GroupAnalyze(){
 	LARGEST_GROUP_SIZE = 0;
@@ -50,14 +52,14 @@ int max(int a,int b){
 void updateLargestSize(int n){
 	LARGEST_GROUP_SIZE = max(n,LARGEST_GROUP_SIZE);
 }
-void makeset(set *d,char *a){
+void makeSet(set *d,char *a){
 	d->h = d;
 	d->n = a;
 	d->s = 1;
 	addGroupNumber();
 	return;
 }
-void uni(set *a,set *b){
+void unionSet(set *a,set *b){
 	if(a->s > b->s){
 		b->h = a;
 		a->s += b->s;
@@ -75,21 +77,21 @@ int *GA(int l,int *id,mail *m){
 	init_GroupAnalyze();
 	for(int i = 0;i < l;i++){
 		int num = id[i];
-		set *a = findset(m[num].to),*b = findset(m[num].from);
+		set *a = findSet(m[num].to),*b = findSet(m[num].from);
 		if(a->h == NULL || b->h == NULL){
 			if (a->h == NULL)
-				makeset(a,m[num].to);
+				makeSet(a,m[num].to);
 			if (b->h == NULL)
-				makeset(b,m[num].from);
-			uni(a,b);
+				makeSet(b,m[num].from);
+			unionSet(a,b);
 		}else if(a != b)
-			uni(a,b);
+			unionSet(a,b);
 	}
 	ans[0] = getGroupNumber();
 	ans[1] = getLargestSize();
 	return ans;
 }
-int char_value(char a){
+int charValue(char a){
 	if (a > 96){
 		return a - 96;
 	}else
@@ -100,11 +102,11 @@ int hash_GroupAnalyze(char *a){		//記得傳來得要'\0'結尾
 		return 0;					//只有一個lindsay
 	int value = 0,i = 1;
 	while(a[i] != '\0'){
-		value += char_value(a[i])*i;
+		value += charValue(a[i])*i;
 		i++;
 	}
 	value *= i;
-	value += 7 * char_value(a[0]);
+	value += 7 * charValue(a[0]);
 	if(value > 8000)
 		return 4800;
 	if(value > 5000)
@@ -112,7 +114,7 @@ int hash_GroupAnalyze(char *a){		//記得傳來得要'\0'結尾
 	return value - 24;
 }
 
-set *findset(char *a){		
+set *findSet(char *a){		
 	int ind = hash_GroupAnalyze(a);
 	set *m = &DJ[ind];
 	if (m->h == NULL)
