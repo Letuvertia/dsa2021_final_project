@@ -6,6 +6,20 @@ This is the final project repo of Team 44 (峻瑋好帥) for DSA 2021 @ NTU CSIE
 - 資工一 王秀軒 b09902033
 - 資工一 洪郁凱 b09902040
 
+## Include Structure
++-- main.c
+|   +-- expression_match.h
+|   |   +-- hashTable.h
+|   +-- find_similar.h
+|   +-- group_analyze.h
+|   +-- api.h
+
+## Some Notes (from Jun)
+
+由於`main.c`這邊是我寫的，怕你們之後debug會有看不懂的困擾，這邊解釋一下。
+我自己習慣寫debug，我都叫他verbose(碎碎念)，所以如果你們看到那個就代表可以直接忽略。
+我上面有一個`#define DEBUG`，你把他設0他就不會一直print東西了。
+
 ## test env
 
 The testdata was generated with the 10000 mails.
