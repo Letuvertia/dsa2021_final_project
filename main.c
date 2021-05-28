@@ -1,6 +1,7 @@
 #include "api.h"
 #include "hashTable.h"
 #include "anthony.h"
+#include "GroupAnalyze.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -104,6 +105,8 @@ int main (void) {
 						fprintf(stderr, "\n");
 				}
 			}
+			int *GA_ans = GA(queries[i].data.group_analyse_data.len,queries[i].data.group_analyse_data.mids,mails);
+			api.answer(queries[i].id, GA_ans, 2);
 		}
 
 		if (verbose && queries[i].type == test_queryType)
