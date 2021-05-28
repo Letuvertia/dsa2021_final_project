@@ -16,11 +16,22 @@ This is the final project repo of Team 44 (峻瑋好帥) for DSA 2021 @ NTU CSIE
     └── api.h
 ```
 
-## Some Notes (from Jun)
+## About DEBUG mode (To 西西 & 洪)
 
-由於`main.c`這邊是我寫的，怕你們之後debug會有看不懂的困擾，這邊解釋一下。  
-我自己習慣寫debug，我都叫他verbose(碎碎念)，所以如果你們看到那個就代表可以直接忽略。  
-我上面有一個`#define DEBUG`，你把他設0他就不會一直print東西了。  
+我在`main.c`裡寫了一個debug mode，關於怎麼用我寫一點註解在code裏。要打開的話把code一開始的`#define DEBUG`設成1就好。  
+他可以做以下的事情  
+1. 他可以讓你指定要測qid為多少的query。
+2. 他可以讓你指定要測某一類型的query。
+3. 他可以幫你把每一個query的答案output進`output.txt`，然後我寫了一個`checkAnswer.py`，他可以幫你確認哪一個query有錯，與從哪裡開始錯，錯誤資訊會output成`JudgeInfo.txt`。
+
+
+## To-do List (So far)
+
+1. group_analyze可以做path compression
+2. 檢查group_analyze的initialization是否有和其他兩個函數的initialization做重複的事
+3. 目前分成`.h`會比一個1000多行的`main.c`容易debug。但這樣每次要繳交要一直複製合併很麻煩。要寫一個可以自動把五份`.h`merge進main.c，可以直接拿去丟DSA Judge的(用Python or C, whatever)，方法目前我想的很簡單，只要根據`Include Structure`，把最底層在放在檔案前面，這樣merge應該就沒問題了(Jun: 這個我可以寫)。
+
+
 
 ## test env
 
