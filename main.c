@@ -1,16 +1,22 @@
 #include "api.h"
 #include "hashTable.h"
+#include "anthony.h"
 #include <stdio.h>
 #include <string.h>
 
-
 #define DEBUG 1
+#define TOKEN_MAX_LEN 1000
+#define MAX_ANSWER_LEN 10050
+
+#include "anthony.h"
 
 
 int n_mails, n_queries;
 mail *mails;
 query *queries;
 
+// initialization
+int answer[MAX_ANSWER_LEN], answerLen;
 
 int main (void) {
 	// debug config
@@ -18,8 +24,7 @@ int main (void) {
 	int test_queries_n = 5;
 	int test_queries[5] = {5, 7, 24, 28, 30};
 	int test_queryType = find_similar;
-
-	// initialization
+	
 	api.init(&n_mails, &n_queries, &mails, &queries);
 	
 	HashTable* hashTables[n_mails];
@@ -27,6 +32,8 @@ int main (void) {
 	for (int mail_ctr; mail_ctr<n_mails; mail_ctr++){
 		hashTable_hashmail(hashTables[mail_ctr], mails[mail_ctr]);
 	}
+
+	initTokensFromMails();
 	
 	if (verbose){
 		fprintf(stderr, "==== DEBUG MODE INFO ====\n");
@@ -70,14 +77,16 @@ int main (void) {
 		if (queries[i].type == expression_match){
 			if (verbose && test_queryType == expression_match)
 				fprintf(stderr, "\tparam: expression: %s\n", queries[i].data.expression_match_data.expression);
-			// api.answer(queries[i].id, NULL, 0);
+			answerLen = 0;
+            expressionMatch(queries[i].data.expression_match_data.expression);
+	        api.answer(queries[i].id, NULL, 0);
 		}
 
 		if (queries[i].type == find_similar){
 			if (verbose && test_queryType == find_similar)
 				fprintf(stderr, "\tparam: mid: %d, thres: %lf\n", queries[i].data.find_similar_data.mid, queries[i].data.find_similar_data.threshold);
 			int *ans_arr = (int *) malloc(sizeof(int)*n_mails);
-			int ans_len = findSimilar_solve(ans_arr, mails, hashTable, queries[i].data.find_similar_data.mid, queries[i].data.find_similar_data.threshold, verbose);
+			int ans_len; // = findSimilar_solve(ans_arr, mails, hashTables, queries[i].data.find_similar_data.mid, queries[i].data.find_similar_data.threshold, verbose);
 			api.answer(queries[i].id, ans_arr, ans_len);
 			free(ans_arr);
 		}
