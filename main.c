@@ -36,6 +36,7 @@ int main (void) {
 
 	initTokensFromMails();
 	
+	/*
 	if (verbose){
 		fprintf(stderr, "==== DEBUG MODE INFO ====\n");
 		fprintf(stderr, "test query type: %d\n", test_queryType); 
@@ -45,11 +46,13 @@ int main (void) {
 		fprintf(stderr, "\ntotal received: n_mails: %d, n_queries: %d\n", n_mails, n_queries);
 		fprintf(stderr, "==== DEBUG MODE INFO END ====\n\n");
 	}
+	*/
 		
 
 	// start processing queries
 	for(int ctr = 0; ctr < test_queries_n; ctr++){
 		int i = test_queries[ctr];
+		/*
 		if (verbose){
 			char queryType[20];
 			switch (queries[i].type){
@@ -74,18 +77,23 @@ int main (void) {
 					break;
 			}	
 		}
+		*/
 		
 		if (queries[i].type == expression_match){
+			/*
 			if (verbose && test_queryType == expression_match)
 				fprintf(stderr, "\tparam: expression: %s\n", queries[i].data.expression_match_data.expression);
+			*/
 			answerLen = 0;
             expressionMatch(queries[i].data.expression_match_data.expression);
 	        api.answer(queries[i].id, NULL, 0);
 		}
 
 		if (queries[i].type == find_similar){
+			/*
 			if (verbose && test_queryType == find_similar)
 				fprintf(stderr, "\tparam: mid: %d, thres: %lf\n", queries[i].data.find_similar_data.mid, queries[i].data.find_similar_data.threshold);
+			*/
 			int *ans_arr = (int *) malloc(sizeof(int)*n_mails);
 			int ans_len; // = findSimilar_solve(ans_arr, mails, hashTables, queries[i].data.find_similar_data.mid, queries[i].data.find_similar_data.threshold, verbose);
 			api.answer(queries[i].id, ans_arr, ans_len);
@@ -93,6 +101,7 @@ int main (void) {
 		}
 			
 		if (queries[i].type == group_analyse){
+			/*
 			if (verbose && test_queryType == group_analyse){
 				fprintf(stderr, "\tparam: len: %d\n\t       mids: ", queries[i].data.group_analyse_data.len);
 				char indentPrefix[20] = "\t             ";
@@ -105,12 +114,15 @@ int main (void) {
 						fprintf(stderr, "\n");
 				}
 			}
+			*/
 			int *GA_ans = GA(queries[i].data.group_analyse_data.len,queries[i].data.group_analyse_data.mids,mails);
 			api.answer(queries[i].id, GA_ans, 2);
 		}
 
+		/*
 		if (verbose && queries[i].type == test_queryType)
 			fprintf(stderr, "\n");
+		*/
 	}
 
 	return 0;
