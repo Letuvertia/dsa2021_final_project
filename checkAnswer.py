@@ -19,10 +19,21 @@ for line in ansfile:
     qid = int(line[:idx])
     if qid in output_dict:
         ans = str(line[idx+2:-1])
-        if (len(output_dict[qid]) == 0):
-            waInfoFile.write("WA: QID:{}. Your ans does not match from &here&:\n".format(qid))
+        if (len(output_dict[qid]) == 0 and len(ans) == 0):
+            continue
+        elif (len(output_dict[qid]) == 0 and len(ans) != 0):
+            ac = False
+            waInfoFile.write("WA: QID:{}. Your ans is blank:\n".format(qid))
             waInfoFile.write("\tYour Ans: blank\n")
-            waInfoFile.write("\tTure Ans: {}\n".format(ans[0: min(10, len(ans))]))
+            waInfoFile.write("\tTure Ans: {}...\n".format(ans[0: min(10, len(ans))]))
+            continue
+        elif (len(output_dict[qid]) != 0 and len(ans) == 0):
+            ac = False
+            waInfoFile.write("WA: QID:{}. Ture ans is blank:\n".format(qid))
+            waInfoFile.write("\tYour Ans: {}...\n".format(output_dict[qid][0: min(10, len(output_dict[qid]))]))
+            waInfoFile.write("\tTure Ans: blank\n")
+            continue
+
         index = next((i for i in range(min(len(output_dict[qid]), len(ans))) if output_dict[qid][i]!=ans[i]), None)
         if index is not None:
             ac = False
@@ -36,7 +47,7 @@ for line in ansfile:
                 format(output_dict[qid][max(index-5, 0): index], output_dict[qid][index], output_dict[qid][index+1: min(index+10, len(output_dict[qid]))]))
             waInfoFile.write("\tTure Ans: ...{}&{}&{}...\n".
                 format(ans[max(index-5, 0): index], ans[index], ans[index+1: min(index+10, len(ans))]))
-print(output_dict[1])
+
 if (ac):
     print("Accept!")
     waInfoFile.write("Accept!")
