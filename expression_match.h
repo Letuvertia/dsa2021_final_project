@@ -104,9 +104,19 @@ bool compute(char *expr, int lenExpr, int mailId, HashTable *hashTables[]) {
             
             // (Jun): I changed findToken() into using hashTable
             // char charPushed = findToken(token, lenToken, mailId)?1:0;
-            char charPushed = hashTable_findToken_inputString(hashTables[mailId], token, lenToken);
+            char charPushed = hashTable_findToken_inputString(hashTables[mailId], token, lenToken)?1:0;
 
-            // printf("found string %s => %d\n", token, charPushed==1);
+            // 1736
+            // Henry
+            // Mumbai Champs was one of the nine teams played in the defunct Indian Cricket League (ICL). The team is based in Mumbai, India and its captain is former New Zealand batsman Nathan Astle.[1][2] The squad announced for the inaugural tournament comprises four international cricketers. Nathan Astle, Johan Van der Wath, Tino Best, Michael Kasprowicz are amongst the high-profile names playing for the Mumbai Champs.[3] Coach - Sandeep Patil   I read the paragraph on http://wikipedia.org 
+            // Mumbai Champs
+            // Victoria
+
+            // !((proboard)&((c19)&(plo))|(aira)|(!((tolbooth)|(459e)|(!tino)&(!mdrx)|(522052n)))&(!20022007))
+
+            // if (mailId == 1736)
+            //     printf("found string %s(hashed:%d) => %d\n", token, hashString(token, lenToken), charPushed?1:0);
+
             charStack_push(&boolStack, charPushed);
         }
         while (operStack.size > 0) {  // size larger than 1

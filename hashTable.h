@@ -11,16 +11,86 @@
 #define Q_RabinKarp 59650000
 #define D_RabinKarp 36
 
+int toNumberArray[1<<7];
+
 // ======= tools =======
 
+void toNumber_init() {
+	toNumberArray['0'] = 0;
+	toNumberArray['1'] = 1;
+	toNumberArray['2'] = 2;
+	toNumberArray['3'] = 3;
+	toNumberArray['4'] = 4;
+	toNumberArray['5'] = 5;
+	toNumberArray['6'] = 6;
+	toNumberArray['7'] = 7;
+	toNumberArray['8'] = 8;
+	toNumberArray['9'] = 9;
+
+	toNumberArray['a'] = 10;
+	toNumberArray['b'] = 11;
+	toNumberArray['c'] = 12;
+	toNumberArray['d'] = 13;
+	toNumberArray['e'] = 14;
+	toNumberArray['f'] = 15;
+	toNumberArray['g'] = 16;
+	toNumberArray['h'] = 17;
+	toNumberArray['i'] = 18;
+	toNumberArray['j'] = 19;
+	toNumberArray['k'] = 20;
+	toNumberArray['l'] = 21;
+	toNumberArray['m'] = 22;
+	toNumberArray['n'] = 23;
+	toNumberArray['o'] = 24;
+	toNumberArray['p'] = 25;
+	toNumberArray['q'] = 26;
+	toNumberArray['r'] = 27;
+	toNumberArray['s'] = 28;
+	toNumberArray['t'] = 29;
+	toNumberArray['u'] = 30;
+	toNumberArray['v'] = 31;
+	toNumberArray['w'] = 32;
+	toNumberArray['x'] = 33;
+	toNumberArray['y'] = 34;
+	toNumberArray['z'] = 35;
+	
+	toNumberArray['A'] = 10;
+	toNumberArray['B'] = 11;
+	toNumberArray['C'] = 12;
+	toNumberArray['D'] = 13;
+	toNumberArray['E'] = 14;
+	toNumberArray['F'] = 15;
+	toNumberArray['G'] = 16;
+	toNumberArray['H'] = 17;
+	toNumberArray['I'] = 18;
+	toNumberArray['J'] = 19;
+	toNumberArray['K'] = 20;
+	toNumberArray['L'] = 21;
+	toNumberArray['M'] = 22;
+	toNumberArray['N'] = 23;
+	toNumberArray['O'] = 24;
+	toNumberArray['P'] = 25;
+	toNumberArray['Q'] = 26;
+	toNumberArray['R'] = 27;
+	toNumberArray['S'] = 28;
+	toNumberArray['T'] = 29;
+	toNumberArray['U'] = 30;
+	toNumberArray['V'] = 31;
+	toNumberArray['W'] = 32;
+	toNumberArray['X'] = 33;
+	toNumberArray['Y'] = 34;
+	toNumberArray['Z'] = 35;
+}
+
 char toNumber(char c) {
-    if ('0' <= c && c <= '9') {
-        return c - '0';
-    }
-    if ('A' <= c && c <= 'Z') {
-        return c - 'A' + 10;
-    }
-    return c - 'a' + 10;
+	return toNumberArray[c];
+    // if ('0' <= c && c <= '9') {
+    //     return c - '0';
+    // }
+    // if ('A' <= c && c <= 'Z') {
+    //     return c - 'A' + 10;
+    // }
+    // return c - 'a' + 10;
 }
 
 
@@ -62,7 +132,7 @@ unsigned int hashString_inChain (char *s_begin, int s_len){
 	// is hashed into the same value by stringHash (written in anthony.h) 
 	unsigned long hash = 5381;
     for (int s_ctr=0; s_ctr<s_len; s_ctr++){
-        hash = ((hash << 5) + hash) + s_begin[s_ctr]; /* hash * 33 + c */
+        hash = ((hash << 5) + hash) + toNumber(s_begin[s_ctr]); /* hash * 33 + c */
     }
 	
 	unsigned int return_hash = hash % ((unsigned int)INT_MAX*2+1); // return int

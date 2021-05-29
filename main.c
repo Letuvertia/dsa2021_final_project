@@ -22,20 +22,15 @@ int main (void) {
 	api.init(&n_mails, &n_queries, &mails, &queries);
 	HashTable* hashTables[n_mails];
 	hashTables_init(hashTables, n_mails);
-	for (int mail_ctr; mail_ctr<1; mail_ctr++){
+	toNumber_init();
+	for (int mail_ctr = 0; mail_ctr < n_mails; mail_ctr++){
 		hashTable_hashmail(hashTables[mail_ctr], mails[mail_ctr]);
 	}
 
-	
-	/*
-	fprintf(stderr, "mail 37 subject: %s\n", mails[37].subject);
-	fprintf(stderr, "mail 37 content: %s\n", mails[37].content);
-	hashTable_hashmail(hashTables[37], mails[37]);
-	int reselt = hashTable_findToken_inputString(hashTables[37], "montitvo", 8);
-	fprintf(stderr, "find: %d\n", reselt);
-	
-	exit(-1);
-	*/
+
+	// printf("find = %d\n", hashTable_findToken_inputString(hashTables[1736], "tino", 4));
+	// printf("Tino=%d, tino=%d\n", hashString("Tino", 4), hashString("tino", 4));
+	// exit(-1);
 
 
 	// DEBUG MODE OFF
@@ -70,8 +65,8 @@ int main (void) {
 		// 1.1 Test specified queries by QID
 		// test queries: find_similar = {5, 7, 24, 28, 30}
 		//               expression_match = {1, 4, 6, 8, 10}
-		int testedQueries_n = 5; // the # of the tested queries
-		int testedQueries[] = {1, 4, 6, 8, 10}; // the qid of the tested queries
+		int testedQueries_n = 1; // the # of the tested queries
+		int testedQueries[] = {4}; // the qid of the tested queries
 		
 		// 1.2 Test specified queries by type
 		// set -1 if you wanna test all
