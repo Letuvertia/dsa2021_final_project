@@ -13,24 +13,30 @@ for line in outputfile:
     idx = line.index(':')
     output_dict[int(line[:idx])] = str(line[idx+2:-1])
 
+
 for line in ansfile:
     idx = line.index(':')
     qid = int(line[:idx])
     if qid in output_dict:
         ans = str(line[idx+2:-1])
+        if (len(output_dict[qid]) == 0):
+            waInfoFile.write("WA: QID:{}. Your ans does not match from &here&:\n".format(qid))
+            waInfoFile.write("\tYour Ans: blank\n")
+            waInfoFile.write("\tTure Ans: {}\n".format(ans[0: min(10, len(ans))]))
         index = next((i for i in range(min(len(output_dict[qid]), len(ans))) if output_dict[qid][i]!=ans[i]), None)
         if index is not None:
             ac = False
-            print("WA: QID:{}. Your ans does not match from (only show 20 chars):".format(qid))
+            print("WA: QID:{}. Your ans does not match from &here&:".format(qid))
             print("\tYour Ans:{}&{}&{}".
                 format(output_dict[qid][max(index-5, 0): index], output_dict[qid][index], output_dict[qid][index+1: min(index+10, len(output_dict[qid]))]))
             print("\tTure Ans:{}&{}&{}".
                 format(ans[max(index-5, 0): index], ans[index], ans[index+1: min(index+10, len(ans))]))
-            waInfoFile.write("WA: QID:{}. Your ans does not match from &here&:\n".format(qid))
-            waInfoFile.write("\tYour Ans:{}&{}&{}\n".
+            waInfoFile.write("WA: QID:{}. Your ans does not match from &here& (show [&-5:&+10]):\n".format(qid))
+            waInfoFile.write("\tYour Ans: ...{}&{}&{}...\n".
                 format(output_dict[qid][max(index-5, 0): index], output_dict[qid][index], output_dict[qid][index+1: min(index+10, len(output_dict[qid]))]))
-            waInfoFile.write("\tTure Ans:{}&{}&{}\n".
+            waInfoFile.write("\tTure Ans: ...{}&{}&{}...\n".
                 format(ans[max(index-5, 0): index], ans[index], ans[index+1: min(index+10, len(ans))]))
+print(output_dict[1])
 if (ac):
     print("Accept!")
     waInfoFile.write("Accept!")

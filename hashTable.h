@@ -154,13 +154,18 @@ void hashTable_pushToken(HashTable *hashTable, char *s_begin, int s_len) {
 
 	hashTable->chains[s_hash][hashTable->chainElementsN[s_hash]] = s_hash_inChain;
 	hashTable->chainElementsN[s_hash]++;
-	//fprintf(stderr, "s_hash: %d, s_hash_inChain: %u\n", s_hash, s_hash_inChain);
+	//fprintf(stderr, "s_hash: %d, s_hash_inChain: %u\n\n", s_hash, s_hash_inChain);
 }
 
 
 bool hashTable_findToken_inputString(HashTable *hashTable, char *s_begin, int s_len) {
     int s_hash = hashString(s_begin, s_len) % HASH_M;
     unsigned int s_hash_inChain = hashString_inChain(s_begin, s_len);
+	//fprintf(stderr, "push Token: ");
+	//for (int i=0; i<s_len; i++)
+	//	fprintf(stderr, "%c", s_begin[i]);
+	//fprintf(stderr, "\n");
+	//fprintf(stderr, "s_hash: %d, s_hash_inChain: %u\n", s_hash, s_hash_inChain);
     return hashTable_findToken_inputHash(hashTable, s_hash, s_hash_inChain);
 }
 

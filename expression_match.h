@@ -39,7 +39,7 @@ int expressionMatch(char *expr, int *ans_arr, HashTable *hashTables[]) {
 	int lenExpr = strlen(expr);
     for (int i = 0; i < n_mails; i++) {
         if (compute(expr, lenExpr, i, hashTables)) {
-            ans_arr[++ans_len] = i;
+            ans_arr[ans_len++] = i;
         }
     }
     return ans_len;
@@ -104,7 +104,7 @@ bool compute(char *expr, int lenExpr, int mailId, HashTable *hashTables[]) {
             
             // (Jun): I changed findToken() into using hashTable
             // char charPushed = findToken(token, lenToken, mailId)?1:0;
-            char charPushed = hashTable_findToken_inputString(hashTables[mailId], token, lenToken)? 1:0;
+            char charPushed = hashTable_findToken_inputString(hashTables[mailId], token, lenToken);
 
             // printf("found string %s => %d\n", token, charPushed==1);
             charStack_push(&boolStack, charPushed);
