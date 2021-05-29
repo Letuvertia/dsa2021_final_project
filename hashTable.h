@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include <limits.h>
 
 #define HASH_M 100 // unsigned long (4 bytes) * HASH_M= memory used for one mail
 #define HASH_S 1
@@ -64,7 +65,7 @@ unsigned int hashString_inChain (char *s_begin, int s_len){
         hash = ((hash << 5) + hash) + s_begin[s_ctr]; /* hash * 33 + c */
     }
 	
-	unsigned int return_hash = hash % (INT_MAX*2+1); // return int
+	unsigned int return_hash = hash % ((unsigned int)INT_MAX*2+1); // return int
 	return return_hash;
 }
 

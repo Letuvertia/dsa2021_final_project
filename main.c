@@ -26,6 +26,7 @@ int main (void) {
 		hashTable_hashmail(hashTables[mail_ctr], mails[mail_ctr]);
 	}
 
+	
 	/*
 	fprintf(stderr, "mail 37 subject: %s\n", mails[37].subject);
 	fprintf(stderr, "mail 37 content: %s\n", mails[37].content);
@@ -33,7 +34,8 @@ int main (void) {
 	int reselt = hashTable_findToken_inputString(hashTables[37], "montitvo", 8);
 	fprintf(stderr, "find: %d\n", reselt);
 	
-	exit(-1);*/
+	exit(-1);
+	*/
 
 
 	// DEBUG MODE OFF
