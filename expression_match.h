@@ -6,7 +6,7 @@
 #include <stdbool.h>
 
 #define CHAR_LEN_FOR_HIT 10
-#define TOKEN_MAX_LEN 1000
+#define TOKEN_MAX_LEN 1000 // (Jun): this is the max length of ONE token?
 
 #define min(x, y) x>y?y:x
 

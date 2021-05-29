@@ -17,31 +17,28 @@ query *queries;
 
 
 int main (void) {
-	
 	// Initialization
+	toNumber_init();
 	api.init(&n_mails, &n_queries, &mails, &queries);
 	HashTable* hashTables[n_mails];
 	hashTables_init(hashTables, n_mails);
-	toNumber_init();
 	for (int mail_ctr = 0; mail_ctr < n_mails; mail_ctr++){
 		hashTable_hashmail(hashTables[mail_ctr], mails[mail_ctr]);
 	}
+	
 
-<<<<<<< HEAD
 
 	// printf("find = %d\n", hashTable_findToken_inputString(hashTables[1736], "tino", 4));
 	// printf("Tino=%d, tino=%d\n", hashString("Tino", 4), hashString("tino", 4));
 	// exit(-1);
-=======
 	
-	fprintf(stderr, "mail 37 subject: %s\n", mails[37].subject);
-	fprintf(stderr, "mail 37 content: %s\n", mails[37].content);
-	hashTable_hashmail(hashTables[37], mails[37]);
-	int reselt = hashTable_findToken_inputString(hashTables[37], "montitvo", 8);
-	fprintf(stderr, "find: %d\n", reselt);
+	//fprintf(stderr, "mail 37 subject: %s\n", mails[37].subject);
+	//fprintf(stderr, "mail 37 content: %s\n", mails[37].content);
+	//hashTable_hashmail(hashTables[37], mails[37]);
+	//int reselt = hashTable_findToken_inputString(hashTables[37], "montitvo", 8);
+	//fprintf(stderr, "find: %d\n", reselt);
 	
-	exit(-1);
->>>>>>> 44985f8e00fb519221043c7b05c9e6056b2e71d3
+	//exit(-1);
 
 
 	// DEBUG MODE OFF
@@ -56,7 +53,7 @@ int main (void) {
 
 			if (queries[i].type == find_similar){
 				int *ans_arr = (int *) malloc(sizeof(int)*n_mails);
-				int ans_len = 1; // = findSimilar_solve(ans_arr, mails, hashTables, queries[i].data.find_similar_data.mid, queries[i].data.find_similar_data.threshold, verbose);
+				int ans_len = findSimilar_solve(ans_arr, hashTables, queries[i].data.find_similar_data.mid, queries[i].data.find_similar_data.threshold);
 				api.answer(queries[i].id, ans_arr, ans_len);
 				free(ans_arr);
 			}
@@ -77,12 +74,12 @@ int main (void) {
 		// test queries: find_similar = {5, 7, 24, 28, 30}
 		//               expression_match = {1, 4, 6, 8, 10}
 		int testedQueries_n = 1; // the # of the tested queries
-		int testedQueries[] = {4}; // the qid of the tested queries
+		int testedQueries[] = {702}; // the qid of the tested queries
 		
 		// 1.2 Test specified queries by type
 		// set -1 if you wanna test all
 		// set -2 if you wanna test by qid
-		int testAllQueries = expression_match;
+		int testAllQueries = find_similar;
 		if (testAllQueries >= -1)
 			testedQueries_n = n_mails;
 		
@@ -179,8 +176,8 @@ int main (void) {
 				if (verbose)
 					fprintf(stderr, "\tparam: mid: %d, thres: %lf\n", queries[i].data.find_similar_data.mid, queries[i].data.find_similar_data.threshold);
 				int *ans_arr = (int *) malloc(sizeof(int)*n_mails);
-				int ans_len = 0; // = findSimilar_solve(ans_arr, mails, hashTables, queries[i].data.find_similar_data.mid, queries[i].data.find_similar_data.threshold, verbose);
-				api.answer(queries[i].id, ans_arr, ans_len);
+				int ans_len = findSimilar_solve(ans_arr, hashTables, queries[i].data.find_similar_data.mid, queries[i].data.find_similar_data.threshold);
+				// api.answer(queries[i].id, ans_arr, ans_len);
 				if (outputAns){
 					fprintf(outFile, "%d:", i);
 					for (int ans_ctr=0; ans_ctr<ans_len; ans_ctr++)
