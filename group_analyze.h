@@ -11,14 +11,12 @@ int GROUP_NUMBER = 0;
 Hash方式 
 回傳值範圍是 0 ~ 5000
 */
-
 typedef struct DJset{
 	int s;			//size
 	char *n;		//原本的名字 防止撞
 	struct DJset *h;//屬於哪個集合
 }set;
 set DJ[5000];
-bool IsSet[5000] = {};
 int ans[2];
 set *findSet(char *a);
 int hash_GroupAnalyze(char *a);
@@ -75,20 +73,26 @@ void unionSet(set *a,set *b){
 }
 int *GA(int l,int *id,mail *m){
 	init_GroupAnalyze();
+
 	for(int i = 0;i < l;i++){
 		int num = id[i];
-		set *a = findSet(m[num].to),*b = findSet(m[num].from);
-		if(a->h == NULL || b->h == NULL){
-			if (a->h == NULL)
+		if(!strcmp(m[num].to,m[num].from))
+			continue;
+		set *a = findSet(m[num].to);
+		if (a->h == NULL){
 				makeSet(a,m[num].to);
-			if (b->h == NULL)
+		}
+		set *b = findSet(m[num].from);
+		if (b->h == NULL){
 				makeSet(b,m[num].from);
+		}
+		if(a != b)
 			unionSet(a,b);
-		}else if(a != b)
-			unionSet(a,b);
+
 	}
 	ans[0] = getGroupNumber();
 	ans[1] = getLargestSize();
+
 	return ans;
 }
 int charValue(char a){
@@ -113,20 +117,26 @@ int hash_GroupAnalyze(char *a){		//記得傳來得要'\0'結尾
 		return 4801;
 	return value - 24;
 }
-
+set *pathCompression(set *m){
+	if(m != m->h){
+		m->h = pathCompression(m->h);
+		return m->h;
+	}else
+		return m;
+}
 set *findSet(char *a){		
 	int ind = hash_GroupAnalyze(a);
+
 	set *m = &DJ[ind];
 	if (m->h == NULL)
 		return m;
-	while(m->h != NULL && strcmp(m->n,a))		//防止collide
+	while(m->h != NULL && strcmp(m->n,a) != 0 ){		//防止collide
 		m += 1;
-	
+	}
 	if (m->h == NULL || m->h == m)
 		return m;
 
 	while(m->h != m)			//向上找set 要用path compression
 		m = m->h;
-	
 	return m;
 }
