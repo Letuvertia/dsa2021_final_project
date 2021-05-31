@@ -6,7 +6,8 @@
 #include <stdbool.h>
 
 // #define TOKEN_MAX_LEN 1000 // (Jun): this is the max length of ONE token?
-                           // (Anthony): yes. I just guess that it'll less than 1000
+                            // (Anthony): yes. I just guess that it'll less than 1000
+                            //(YuKai): Stack is good.
 
 #define min(x, y) x>y?y:x
 
