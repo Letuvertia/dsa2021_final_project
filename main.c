@@ -16,17 +16,17 @@ query *queries;
 #define DEBUG 1
 
 
+
 int main (void) {
 	// Initialization
+	
 	toNumber_init();
+	HashTable* hashTables[10000];
+	hashTables_init(hashTables, 10000);
 	api.init(&n_mails, &n_queries, &mails, &queries);
-	HashTable* hashTables[n_mails];
-	hashTables_init(hashTables, n_mails);
 	for (int mail_ctr = 0; mail_ctr < n_mails; mail_ctr++){
 		hashTable_hashmail(hashTables[mail_ctr], mails[mail_ctr]);
 	}
-	
-
 
 	// printf("find = %d\n", hashTable_findToken_inputString(hashTables[1736], "tino", 4));
 	// printf("Tino=%d, tino=%d\n", hashString("Tino", 4), hashString("tino", 4));
@@ -71,7 +71,7 @@ int main (void) {
 		// 1.2 Test specified queries by type
 		// set -1 if you wanna test all
 		// set -2 if you wanna test by qid
-		int testAllQueries = find_similar;
+		int testAllQueries = -1;
 		if (testAllQueries >= -1)
 			testedQueries_n = n_mails;
 		

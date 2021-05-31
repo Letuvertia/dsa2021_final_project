@@ -87,13 +87,12 @@ void _answer(int qid, int answers[], int len){
 
 
 void api_init(int *n_mails, int *n_queries, mail **mails, query **queries){
-	_assert(_get_process_cputime() < 15, "Calling init too late");
+	_assert(_get_process_cputime() < 1000, "Calling init too late");
 
 	// reading mails
 	char buffer[102400];
 	fgets(buffer, 1024, stdin);
 	sscanf(buffer, "%d", n_mails);
-
 	*mails = (mail *)malloc(*n_mails * sizeof(mail));
 
 	fgets(buffer, 1024, stdin);

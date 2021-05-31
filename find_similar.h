@@ -46,7 +46,7 @@ int findSimilar_solve (int *ans_arr, HashTable* hashTables[], int mid, double th
 		double union_count = hashTable_moreToken->tokenN;
 		double intersec_count = 0;
 		for (int token_ctr=0; token_ctr < hashTable_lessToken->tokenN; token_ctr++){
-			int find = hashTable_findToken_inputHash(hashTable_moreToken, hashTable_lessToken->s_hashes[token_ctr], hashTable_lessToken->s_hashes_inChain[token_ctr]);
+			char find = hashTable_findToken_inputHash(hashTable_moreToken, hashTable_lessToken->s_hashes[token_ctr], hashTable_lessToken->s_hashes_inChain[token_ctr]);
 			//fprintf(stderr, "check token s_hash_inChain: %u. Find: %d\n", hashTable_lessToken->s_hashes_inChain[token_ctr], find);
 
 			if (find)
