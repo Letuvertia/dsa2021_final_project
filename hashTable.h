@@ -6,6 +6,7 @@
 
 #define HASH_M 100 // unsigned long (4 bytes) * HASH_M= memory used for one mail
 #define HASH_S 1
+#define TOKENS_MAX_N 3500 // mid 9771 (start from 0) has the most tokens of 3416.
 #define S_ENLARGE_RATIO 3
 
 #define Q_RabinKarp 59650000
@@ -129,7 +130,7 @@ int hashString(char *s, int len) {
 // 		  http://www.cse.yorku.ca/~oz/hash.html
 unsigned int hashString_inChain (char *s_begin, int s_len){
 	// used "within a chain". That is, used only when different string 
-	// is hashed into the same value by stringHash (written in anthony.h) 
+	// is hashed into the same value by hashString
 	unsigned long hash = 5381;
     for (int s_ctr=0; s_ctr<s_len; s_ctr++){
         hash = ((hash << 5) + hash) + toNumber(s_begin[s_ctr]); /* hash * 33 + c */
@@ -150,6 +151,12 @@ typedef struct HashTable {
 	unsigned int **chains;
 	unsigned char chainCapacity[HASH_M]; // using char just for saving memory
 	unsigned char chainElementsN[HASH_M];
+
+	int tokenN;
+	// (Jun): store hashes of each token in the original order
+	//        to avoid repeated hashing
+	int s_hashes[TOKENS_MAX_N]; 
+	unsigned int s_hashes_inChain[TOKENS_MAX_N];
 } HashTable;
 
 
@@ -160,23 +167,25 @@ bool hashTable_findToken_inputString(HashTable *hashTable, char *s_begin, int s_
 bool hashTable_findToken_inputHash(HashTable *hashTable, int s_hash, unsigned int s_hash_inChain);
 
 
-void hashTables_init(HashTable *hashTable[], int n_mails) {
+void hashTables_init(HashTable *hashTables[], int n_mails) {
 	// this function initialize a HashTable pointer of n mails.
 	for (int mail_ctr=0; mail_ctr<n_mails; mail_ctr++){
-		hashTable[mail_ctr] = (HashTable *) malloc(sizeof(HashTable));
-		hashTable[mail_ctr]->chains = (unsigned int **) malloc(sizeof(unsigned int*)*HASH_M);
+		hashTables[mail_ctr] = (HashTable *) malloc(sizeof(HashTable));
+		hashTables[mail_ctr]->chains = (unsigned int **) malloc(sizeof(unsigned int*)*HASH_M);
 		for (int m_ctr=0; m_ctr<HASH_M; m_ctr++) {
-			hashTable[mail_ctr]->chains[m_ctr] = (unsigned int *) malloc(sizeof(unsigned int)*HASH_S);
-			hashTable[mail_ctr]->chainCapacity[m_ctr] = HASH_S;
-			hashTable[mail_ctr]->chainElementsN[m_ctr] = 0;
+			hashTables[mail_ctr]->chains[m_ctr] = (unsigned int *) malloc(sizeof(unsigned int)*HASH_S);
+			hashTables[mail_ctr]->chainCapacity[m_ctr] = HASH_S;
+			hashTables[mail_ctr]->chainElementsN[m_ctr] = 0;
 		}
+		hashTables[mail_ctr]->tokenN = 0;
 	}
 }
 
-
+//int max_tokenN = -1;
 void hashTable_hashmail(HashTable* hashTable, mail mail) {
 	hashTable_hashParagraph(hashTable, mail.subject);
 	hashTable_hashParagraph(hashTable, mail.content);
+	//max_tokenN = (max_tokenN < hashTable->tokenN)? hashTable->tokenN: max_tokenN;
 }
 
 
@@ -226,6 +235,10 @@ void hashTable_pushToken(HashTable *hashTable, char *s_begin, int s_len) {
 	hashTable->chains[s_hash][hashTable->chainElementsN[s_hash]] = s_hash_inChain;
 	hashTable->chainElementsN[s_hash]++;
 	//fprintf(stderr, "s_hash: %d, s_hash_inChain: %u\n\n", s_hash, s_hash_inChain);
+
+	hashTable->s_hashes[hashTable->tokenN] = s_hash;
+	hashTable->s_hashes_inChain[hashTable->tokenN] = s_hash_inChain;
+	hashTable->tokenN++;
 }
 
 

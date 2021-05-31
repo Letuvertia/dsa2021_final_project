@@ -1,5 +1,8 @@
 main.exe
 output.txt
 JudgeInfo.txt
+
 test_env/
+.vscode/
+
 a.out
