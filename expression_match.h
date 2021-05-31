@@ -5,8 +5,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#define CHAR_LEN_FOR_HIT 10
-#define TOKEN_MAX_LEN 1000 // (Jun): this is the max length of ONE token?
+// #define TOKEN_MAX_LEN 1000 // (Jun): this is the max length of ONE token?
+                            // (Anthony): yes. I just guess that it'll less than 1000
+                            //(YuKai): Stack is good.
 
 #define min(x, y) x>y?y:x
 
@@ -93,19 +94,15 @@ bool compute(char *expr, int lenExpr, int mailId, HashTable *hashTables[]) {
             charStack_push(&operStack, '&');
         }
         else {  // reach a token
-            char token[TOKEN_MAX_LEN];
-            int lenToken = 0;
-            while (i < lenExpr && !isDelimiter(expr[i])) {
-                token[lenToken++] = expr[i];
-                i++;
+            int tokenLen = 0;
+            while (i+tokenLen < lenExpr && !isDelimiter(expr[i+tokenLen])) {
+                tokenLen++;
             }
-            i--;
-            token[lenToken] = '\0';
             
             // (Jun): I changed findToken() into using hashTable
             // char charPushed = findToken(token, lenToken, mailId)?1:0;
-            char charPushed = hashTable_findToken_inputString(hashTables[mailId], token, lenToken)?1:0;
-
+            char charPushed = hashTable_findToken_inputString(hashTables[mailId], expr+i, tokenLen)?1:0;
+            i += tokenLen - 1;
             // 1736
             // Henry
             // Mumbai Champs was one of the nine teams played in the defunct Indian Cricket League (ICL). The team is based in Mumbai, India and its captain is former New Zealand batsman Nathan Astle.[1][2] The squad announced for the inaugural tournament comprises four international cricketers. Nathan Astle, Johan Van der Wath, Tino Best, Michael Kasprowicz are amongst the high-profile names playing for the Mumbai Champs.[3] Coach - Sandeep Patil   I read the paragraph on http://wikipedia.org 
@@ -170,7 +167,10 @@ bool compute(char *expr, int lenExpr, int mailId, HashTable *hashTables[]) {
     // printf("\n");
     // charStack_print(&boolStack);
     // charStack_print(&operStack);
-    return charStack_top(&boolStack) == 1;
+    bool returnAns = charStack_top(&boolStack) == 1;
+    free(boolStack.arr);
+    free(operStack.arr);
+    return returnAns;
 }
 
 
@@ -262,107 +262,3 @@ void charStack_print(CharStack *cs) {
     printf("\n");
 }
 // Stack end
-
-
-
-
-/*
-// ======= dynamic array =======
-// ======= function declearations =======
-
-typedef struct TokenList
-{
-    int *list;  // start from 0
-    char *charList;  // use for spurious hit
-    int size, capa;
-}TokenList;
-
-void initTokensFromMails();
-void token_init(TokenList *);
-void token_push(TokenList *tokenList, char *T, int len);
-void initTokensFromString(TokenList *, char *);
-bool findToken(char *P, int lenP, int mailId);
-
-TokenList mailTokenLists[MAX_ANSWER_LEN];
-*/
-
-
-/*
-// ======= dynamic array =======
-// ======= function definitions =======
-
-void initTokensFromMails() {
-    for (int i = 0; i < n_mails; i++) {
-        token_init(&mailTokenLists[i]);
-        initTokensFromString(&mailTokenLists[i], mails[i].subject);
-        initTokensFromString(&mailTokenLists[i], mails[i].content);
-    }
-}
-
-
-void token_init(TokenList *tokenList) {
-    tokenList->capa = 1;
-    tokenList->size = -1;
-    tokenList->list = malloc(tokenList->capa * sizeof(int));
-    tokenList->charList = malloc(CHAR_LEN_FOR_HIT * tokenList->capa * sizeof(char));
-}
-
-
-void token_push(TokenList *tokenList, char *T, int len) {
-    // printf("pushing ");
-    // for (int i = 0; i < len; i++)
-    //     printf("%c", T[i]);
-    // printf("\n");
-    if (tokenList->size+1 >= tokenList->capa) {
-        tokenList->capa *= 2;
-        tokenList->list = realloc(tokenList->list, sizeof(int) * tokenList->capa);
-        tokenList->charList = realloc(tokenList->charList, CHAR_LEN_FOR_HIT * tokenList->capa * sizeof(char));
-    }
-    tokenList->list[++tokenList->size] = hashString(T, len);
-    myStrcpy(tokenList->charList + tokenList->size * CHAR_LEN_FOR_HIT, T, min(CHAR_LEN_FOR_HIT-1, len));
-}
-
-
-void initTokensFromString(TokenList* tokenList, char *T) {
-    for (int s = 0; T[s] != '\0'; s++) {
-        if ((s == 0 && isDelimiter(T[s])) || (s != 0 && !(isDelimiter(T[s-1]) && !isDelimiter(T[s])))) {
-            continue;
-        }
-        int sLen = 0;
-        while (!isDelimiter(T[s+sLen])) {
-            // printf("%c", T[s+sLen]);
-            sLen++;
-        }
-        // printf("\n");
-        token_push(tokenList, T+s, sLen);
-        s += sLen;
-    }
-}
-
-
-bool findToken(char *P, int lenP, int mailId) {
-    bool found = false;
-    int p = hashString(P, lenP);
-    // printf("searching for token %s=%d\n", P, p);
-    int *list = mailTokenLists[mailId].list;
-    for (int i = 0; i <= mailTokenLists[mailId].size; i++) {
-        if (list[i] == p) {
-            // printf("We got a hit!\n");
-            char *charList = mailTokenLists[mailId].charList + i * CHAR_LEN_FOR_HIT;
-            for (int i = 0; i < CHAR_LEN_FOR_HIT; i++) {
-                // printf("comparing %c to %c", P[i], charList[i]);
-                if (charList[i] == '\0') {
-                    // printf("Found!!\n");
-                    found = true;
-                    break;
-                }
-                if (toNumber(P[i]) != toNumber(P[i])) break;
-            }
-        }
-    }
-    return found;
-}
-
-// Dynamic array end
-
-*/

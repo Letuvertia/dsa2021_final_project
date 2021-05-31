@@ -31,14 +31,6 @@ int main (void) {
 	// printf("find = %d\n", hashTable_findToken_inputString(hashTables[1736], "tino", 4));
 	// printf("Tino=%d, tino=%d\n", hashString("Tino", 4), hashString("tino", 4));
 	// exit(-1);
-	
-	//fprintf(stderr, "mail 37 subject: %s\n", mails[37].subject);
-	//fprintf(stderr, "mail 37 content: %s\n", mails[37].content);
-	//hashTable_hashmail(hashTables[37], mails[37]);
-	//int reselt = hashTable_findToken_inputString(hashTables[37], "montitvo", 8);
-	//fprintf(stderr, "find: %d\n", reselt);
-	
-	//exit(-1);
 
 
 	// DEBUG MODE OFF
