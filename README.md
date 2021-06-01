@@ -16,7 +16,7 @@ This is the final project repo of Team 44 (峻瑋好帥) for DSA 2021 @ NTU CSIE
     └── api.h
 ```
 
-### About `autoMerger.py`
+## About `autoMerger.py`
 
 可以正確Merge的一些條件:
 - 他會根據code中的`// Mark?:`做判斷，看到這種開頭盡量不要更改。 
