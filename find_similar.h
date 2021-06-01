@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+// Mark2: Functions definitions
 
 int findSimilar_solve (int *ans_arr, HashTable* hashTables[], int mid, double thres){
 	int ans_len = 0;

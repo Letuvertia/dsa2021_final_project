@@ -9,8 +9,10 @@
                             // (Anthony): yes. I just guess that it'll less than 1000
                             //(YuKai): Stack is good.
 
-#define min(x, y) x>y?y:x
+// #define min(x, y) x>y?y:x
 
+
+// Mark1: Functions declarations
 
 // Main functions
 int expressionMatch(char *expr, int *ans_arr, HashTable *hashTables[]);
@@ -21,11 +23,8 @@ int operatorLevel(char);
 void myStrcpy(char *dest, char *source, int len);
 
 // Stack
-typedef struct CharStack {
-    // start from 0 so size will be initialize -1
-    char *arr;
-    int size, capa;
-} CharStack;
+struct Charstack;
+typedef struct CharStack CharStack;
 void charStack_init(CharStack *);
 bool charStack_empty(CharStack *);
 void charStack_push(CharStack *, char);
@@ -33,6 +32,77 @@ char charStack_pop(CharStack *);
 char charStack_top(CharStack *);
 void charStack_print(CharStack *);
 
+
+// Mark2: Functions definitions
+// Stack
+typedef struct CharStack {
+    // start from 0 so size will be initialize -1
+    char *arr;
+    int size, capa;
+} CharStack;
+
+
+void charStack_init(CharStack *cs) {
+    cs->size = -1;
+    cs->capa = 1;
+    cs->arr = malloc(sizeof(char)*cs->capa);
+}
+
+
+bool charStack_empty(CharStack *cs) {
+    return cs->size <= -1;
+}
+
+
+void charStack_push(CharStack *cs, char charPushed) {
+    if (cs->size+1 >= cs->capa) {
+        cs->capa *= 2;
+        cs->arr = realloc(cs->arr, sizeof(char)*cs->capa);
+    }
+    cs->size++;
+    cs->arr[cs->size] = charPushed;
+}
+
+
+char charStack_pop(CharStack *cs) {
+    if (!charStack_empty(cs)) {
+        cs->size--;
+        return cs->arr[cs->size+1];
+    }
+    else {
+        return -1;
+    }
+}
+
+
+char charStack_top(CharStack *cs) {
+    if (!charStack_empty(cs)) {
+        return cs->arr[cs->size];
+    }
+    else {
+        return -1;
+    }
+}
+
+
+void charStack_print(CharStack *cs) {
+    for (int i = 0; i <= cs->size; i++) {
+        if (cs->arr[i] == 0) {
+            printf("0 ");
+        }
+
+        else if (cs->arr[i] == 1) {
+            printf("1 ");
+        }
+        
+        else {
+            printf("%c ", cs->arr[i]);
+        }
+    }
+    printf(" size = %d", cs->size);
+    printf("\n");
+}
+// Stack end
 
 
 int expressionMatch(char *expr, int *ans_arr, HashTable *hashTables[]) {
@@ -198,67 +268,3 @@ void myStrcpy(char *dest, char *source, int len) {
     }
     dest[len] = '\0';
 }
-
-
-// Stack
-void charStack_init(CharStack *cs) {
-    cs->size = -1;
-    cs->capa = 1;
-    cs->arr = malloc(sizeof(char)*cs->capa);
-}
-
-
-bool charStack_empty(CharStack *cs) {
-    return cs->size <= -1;
-}
-
-
-void charStack_push(CharStack *cs, char charPushed) {
-    if (cs->size+1 >= cs->capa) {
-        cs->capa *= 2;
-        cs->arr = realloc(cs->arr, sizeof(char)*cs->capa);
-    }
-    cs->size++;
-    cs->arr[cs->size] = charPushed;
-}
-
-
-char charStack_pop(CharStack *cs) {
-    if (!charStack_empty(cs)) {
-        cs->size--;
-        return cs->arr[cs->size+1];
-    }
-    else {
-        return -1;
-    }
-}
-
-
-char charStack_top(CharStack *cs) {
-    if (!charStack_empty(cs)) {
-        return cs->arr[cs->size];
-    }
-    else {
-        return -1;
-    }
-}
-
-
-void charStack_print(CharStack *cs) {
-    for (int i = 0; i <= cs->size; i++) {
-        if (cs->arr[i] == 0) {
-            printf("0 ");
-        }
-
-        else if (cs->arr[i] == 1) {
-            printf("1 ");
-        }
-        
-        else {
-            printf("%c ", cs->arr[i]);
-        }
-    }
-    printf(" size = %d", cs->size);
-    printf("\n");
-}
-// Stack end

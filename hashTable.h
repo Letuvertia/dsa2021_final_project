@@ -12,12 +12,33 @@
 #define Q_RabinKarp 59650000
 #define D_RabinKarp 36
 
-#define INITIAL_MAIL_N 10000
+// #define INITIAL_MAIL_N 10000
 
+
+// Mark1: Functions declarations
+struct HashTable;
+typedef struct HashTable HashTable;
+bool isDelimiter(char c);
+unsigned int hashString(unsigned char *s_begin, int s_len);
+unsigned int hashString_inChain (char *s_begin, int s_len);
+void hashTables_init(HashTable* hashTable[], int table_n);
+void hashTable_hashParagraph(HashTable *hashTable, char *para);
+void hashTable_pushToken(HashTable *hashTable, char *s_begin, int s_len);
+bool hashTable_findToken_inputString(HashTable *hashTable, char *s_begin, int s_len);
+bool hashTable_findToken_inputHash(HashTable *hashTable, unsigned int s_hash, unsigned int s_hash_inChain);
+
+
+
+// Mark2: Functions definitions
+
+// ==== tool functions====
+
+/*
+(Jun): I think that there is no need to transform char to number
+       in hashString, because what hash funcitons do is to scamble
+       the bits to make it uniformly distributed. There is no diff
+       between 0 and 48 as a shift during hashing.
 int toNumberArray[1<<7];
-
-// ======= tools =======
-
 void toNumber_init() {
 	// 0-9 48-57
 	for (int i=48; i<=57; i++)
@@ -28,85 +49,10 @@ void toNumber_init() {
 	// a-z 97-122
 	for (int i=97; i<=122; i++)
 		toNumberArray[i] = i-87;
-	
-
-	/*
-	toNumberArray['0'] = 0;
-	toNumberArray['1'] = 1;
-	toNumberArray['2'] = 2;
-	toNumberArray['3'] = 3;
-	toNumberArray['4'] = 4;
-	toNumberArray['5'] = 5;
-	toNumberArray['6'] = 6;
-	toNumberArray['7'] = 7;
-	toNumberArray['8'] = 8;
-	toNumberArray['9'] = 9;
-
-	toNumberArray['a'] = 10;
-	toNumberArray['b'] = 11;
-	toNumberArray['c'] = 12;
-	toNumberArray['d'] = 13;
-	toNumberArray['e'] = 14;
-	toNumberArray['f'] = 15;
-	toNumberArray['g'] = 16;
-	toNumberArray['h'] = 17;
-	toNumberArray['i'] = 18;
-	toNumberArray['j'] = 19;
-	toNumberArray['k'] = 20;
-	toNumberArray['l'] = 21;
-	toNumberArray['m'] = 22;
-	toNumberArray['n'] = 23;
-	toNumberArray['o'] = 24;
-	toNumberArray['p'] = 25;
-	toNumberArray['q'] = 26;
-	toNumberArray['r'] = 27;
-	toNumberArray['s'] = 28;
-	toNumberArray['t'] = 29;
-	toNumberArray['u'] = 30;
-	toNumberArray['v'] = 31;
-	toNumberArray['w'] = 32;
-	toNumberArray['x'] = 33;
-	toNumberArray['y'] = 34;
-	toNumberArray['z'] = 35;
-	
-	toNumberArray['A'] = 10;
-	toNumberArray['B'] = 11;
-	toNumberArray['C'] = 12;
-	toNumberArray['D'] = 13;
-	toNumberArray['E'] = 14;
-	toNumberArray['F'] = 15;
-	toNumberArray['G'] = 16;
-	toNumberArray['H'] = 17;
-	toNumberArray['I'] = 18;
-	toNumberArray['J'] = 19;
-	toNumberArray['K'] = 20;
-	toNumberArray['L'] = 21;
-	toNumberArray['M'] = 22;
-	toNumberArray['N'] = 23;
-	toNumberArray['O'] = 24;
-	toNumberArray['P'] = 25;
-	toNumberArray['Q'] = 26;
-	toNumberArray['R'] = 27;
-	toNumberArray['S'] = 28;
-	toNumberArray['T'] = 29;
-	toNumberArray['U'] = 30;
-	toNumberArray['V'] = 31;
-	toNumberArray['W'] = 32;
-	toNumberArray['X'] = 33;
-	toNumberArray['Y'] = 34;
-	toNumberArray['Z'] = 35;
-	*/
 }
 
 char toNumber(char c) {
 	return toNumberArray[c];
-    // if ('0' <= c && c <= '9') {
-    //     return c - '0';
-    // }
-    // if ('A' <= c && c <= 'Z') {
-    //     return c - 'A' + 10;
-    // }
-    // return c - 'a' + 10;
 }
 
 
@@ -122,6 +68,7 @@ int isAlphaNumeric (char c){
 		return 1;
 	return 0;
 }
+*/
 
 
 bool isDelimiter(char c) {
@@ -142,7 +89,9 @@ int hashString(char *s, int len) {
 }*/
 
 
-// (Jun): just testing out some other hash functions
+// (Jun): hash functions below are from 
+// 		  http://www.cse.yorku.ca/~oz/hash.html
+// (Jun): just testing out some other hash functions with bit arithmetic
 unsigned int hashString(unsigned char *s_begin, int s_len) {
 	unsigned int hash = 0;
 	for (int s_ctr=0; s_ctr<s_len; s_ctr++){
@@ -152,8 +101,6 @@ unsigned int hashString(unsigned char *s_begin, int s_len) {
 }
 
 
-// (Jun): I found hash function samples from 
-// 		  http://www.cse.yorku.ca/~oz/hash.html
 unsigned int hashString_inChain (char *s_begin, int s_len){
 	// used "within a chain". That is, used only when different string 
 	// is hashed into the same value by hashString
@@ -167,9 +114,7 @@ unsigned int hashString_inChain (char *s_begin, int s_len){
 }
 
 
-
-
-// ======= hash table functions =======
+// ==== functions for HashTable ====
 
 typedef struct HashTable {
     // chaining hash table
@@ -186,23 +131,20 @@ typedef struct HashTable {
 } HashTable;
 
 
-void hashTables_init(HashTable* hashTable[], int table_n);
-void hashTable_hashParagraph(HashTable *hashTable, char *para);
-void hashTable_pushToken(HashTable *hashTable, char *s_begin, int s_len);
-bool hashTable_findToken_inputString(HashTable *hashTable, char *s_begin, int s_len);
-bool hashTable_findToken_inputHash(HashTable *hashTable, unsigned int s_hash, unsigned int s_hash_inChain);
-
-
 void hashTables_init(HashTable *hashTables[], int table_n) {
 	// this function initialize a HashTable pointer of n mails.
 	for (int mail_ctr=0; mail_ctr<table_n; mail_ctr++){
 		hashTables[mail_ctr] = (HashTable *) malloc(sizeof(HashTable));
 		hashTables[mail_ctr]->chains = (unsigned int **) malloc(sizeof(unsigned int*)*HASH_M);
+		memset(hashTables[mail_ctr]->chainElementsN, 0, HASH_M*sizeof(char));
+		// (Jun): allocate the chain when needed
+		/*
 		for (int m_ctr=0; m_ctr<HASH_M; m_ctr++) {
 			hashTables[mail_ctr]->chains[m_ctr] = (unsigned int *) malloc(sizeof(unsigned int)*HASH_S);
 			hashTables[mail_ctr]->chainCapacity[m_ctr] = HASH_S;
 			hashTables[mail_ctr]->chainElementsN[m_ctr] = 0;
 		}
+		*/
 	}
 }
 
@@ -238,25 +180,33 @@ void hashTable_pushToken(HashTable *hashTable, char *s_begin, int s_len) {
 	//	fprintf(stderr, "%c", s_begin[i]);
 	//fprintf(stderr, "\n");
 
-	// check whether the token repeated
+	
 	unsigned int s_hash = hashString(s_begin, s_len) % HASH_M;
 	unsigned int s_hash_inChain = hashString_inChain(s_begin, s_len);
-	//fprintf(stderr, "s_hash: %d, s_hash_inChain: %u\n\n", s_hash, s_hash_inChain);
-	for (int i=0; i<hashTable->chainElementsN[s_hash]; i++)
-		if (hashTable->chains[s_hash][i] == s_hash_inChain){
-			//fprintf(stderr, "repeated\n");
-			return;
-		}
 
-	// enlarge
-	if (hashTable->chainCapacity[s_hash] == hashTable->chainElementsN[s_hash]) {
-		unsigned char newCapacity = (hashTable->chainElementsN[s_hash] * S_ENLARGE_RATIO > (CHAR_MAX*2+1))? 
-			(CHAR_MAX*2+1) : hashTable->chainElementsN[s_hash] * S_ENLARGE_RATIO;
-		hashTable->chains[s_hash] 
-			= (unsigned int *) realloc(hashTable->chains[s_hash], sizeof(unsigned int)*newCapacity);
-		//fprintf(stderr, "enlarge chain from %d to %d\n", hashTable->chainCapacity[s_hash], newCapacity);
-		hashTable->chainCapacity[s_hash] = newCapacity;
+	// check if the chain initialize
+	if (hashTable->chainElementsN[s_hash] == 0){
+		hashTable->chains[s_hash] = (unsigned int *) malloc(sizeof(unsigned int)*HASH_S);
+		hashTable->chainCapacity[s_hash] = HASH_S;
 	}
+
+	else{
+		// check whether the token repeated
+		for (int i=0; i<hashTable->chainElementsN[s_hash]; i++)
+			if (hashTable->chains[s_hash][i] == s_hash_inChain)
+				return;
+
+		// enlarge
+		if (hashTable->chainCapacity[s_hash] == hashTable->chainElementsN[s_hash]) {
+			unsigned char newCapacity = (hashTable->chainElementsN[s_hash] * S_ENLARGE_RATIO > (CHAR_MAX*2+1))? 
+				(CHAR_MAX*2+1) : hashTable->chainElementsN[s_hash] * S_ENLARGE_RATIO;
+			hashTable->chains[s_hash] 
+				= (unsigned int *) realloc(hashTable->chains[s_hash], sizeof(unsigned int)*newCapacity);
+			//fprintf(stderr, "enlarge chain from %d to %d\n", hashTable->chainCapacity[s_hash], newCapacity);
+			hashTable->chainCapacity[s_hash] = newCapacity;
+		}
+	}
+	
 
 	hashTable->chains[s_hash][hashTable->chainElementsN[s_hash]] = s_hash_inChain;
 	hashTable->chainElementsN[s_hash]++;

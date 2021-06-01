@@ -13,47 +13,46 @@ query *queries;
 #include "find_similar.h"
 
 // debug config
-#define DEBUG 1
+#define DEBUG 1 
 
 
-
+// Mark2: Functions definitions
 int main (void) {
 	// Initialization
-	
-	toNumber_init();
+	api.init(&n_mails, &n_queries, &mails, &queries);
 	HashTable* hashTables[10000];
 	hashTables_init(hashTables, 10000);
-	api.init(&n_mails, &n_queries, &mails, &queries);
 	for (int mail_ctr = 0; mail_ctr < n_mails; mail_ctr++){
 		hashTable_hashmail(hashTables[mail_ctr], mails[mail_ctr]);
 	}
 
-	// printf("find = %d\n", hashTable_findToken_inputString(hashTables[1736], "tino", 4));
-	// printf("Tino=%d, tino=%d\n", hashString("Tino", 4), hashString("tino", 4));
-	// exit(-1);
-
-
 	// DEBUG MODE OFF
 	if (!DEBUG){
 		for(int i = 0; i < n_mails; i++){
+			// Mark3-0: call expression_match
 			if (queries[i].type == expression_match){
 				int *ans_arr = (int *) malloc(sizeof(int)*n_mails);
 				int ans_len = expressionMatch(queries[i].data.expression_match_data.expression, ans_arr, hashTables);
 				api.answer(queries[i].id, ans_arr, ans_len);
 				free(ans_arr);
 			}
-
+			
+			// Mark3-1: call find_similar
 			if (queries[i].type == find_similar){
 				int *ans_arr = (int *) malloc(sizeof(int)*n_mails);
 				int ans_len = findSimilar_solve(ans_arr, hashTables, queries[i].data.find_similar_data.mid, queries[i].data.find_similar_data.threshold);
 				api.answer(queries[i].id, ans_arr, ans_len);
 				free(ans_arr);
 			}
-				
+			
+			// Mark3-2: call group_analyse
 			if (queries[i].type == group_analyse){
-				int *GA_ans = GA(queries[i].data.group_analyse_data.len,queries[i].data.group_analyse_data.mids,mails);
-				api.answer(queries[i].id, GA_ans, 2);
+				int *ans_arr = (int *) malloc(sizeof(int)*2);
+				GA(ans_arr, queries[i].data.group_analyse_data.len,queries[i].data.group_analyse_data.mids,mails);
+				api.answer(queries[i].id, ans_arr, 2);
 			}
+
+			// Mark3-4: end call
 		}
 	}
 	
@@ -71,7 +70,7 @@ int main (void) {
 		// 1.2 Test specified queries by type
 		// set -1 if you wanna test all
 		// set -2 if you wanna test by qid
-		int testAllQueries = -1;
+		int testAllQueries = find_similar;
 		if (testAllQueries >= -1)
 			testedQueries_n = n_mails;
 		
@@ -181,14 +180,16 @@ int main (void) {
 				
 			if (queries[i].type == group_analyse){
 				// print your debug info in your functions if needed
-				int *GA_ans = GA(queries[i].data.group_analyse_data.len,queries[i].data.group_analyse_data.mids,mails);
-				api.answer(queries[i].id, GA_ans, 2);
+				int *ans_arr = (int *) malloc(sizeof(int)*2);
+				GA(ans_arr, queries[i].data.group_analyse_data.len,queries[i].data.group_analyse_data.mids,mails);
+				api.answer(queries[i].id, ans_arr, 2);
 				if (outputAns){
 					fprintf(outFile, "%d:", i);
 					for (int ans_ctr=0; ans_ctr<2; ans_ctr++)
-						fprintf(outFile, " %d", GA_ans[ans_ctr]);
+						fprintf(outFile, " %d", ans_arr[ans_ctr]);
 					fprintf(outFile, "\n");
 				}
+				free(ans_arr);
 			}
 
 			if (verbose)

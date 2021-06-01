@@ -87,6 +87,7 @@ void _answer(int qid, int answers[], int len){
 
 
 void api_init(int *n_mails, int *n_queries, mail **mails, query **queries){
+	fprintf(stderr, "init time: %lu\n", _get_process_cputime());
 	_assert(_get_process_cputime() < 1000, "Calling init too late");
 
 	// reading mails

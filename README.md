@@ -16,6 +16,18 @@ This is the final project repo of Team 44 (峻瑋好帥) for DSA 2021 @ NTU CSIE
     └── api.h
 ```
 
+### About `autoMerger.py`
+
+可以正確Merge的一些條件:
+- 他會根據code中的`// Mark?:`做判斷，看到這種開頭盡量不要更改。 
+- 函數宣告放在`// Mark1: Functions declarations`下。  
+- 函數定義放在`// Mark2: Functions definitions`下。
+- 不要用global variables
+
+autoMerger會自動merge好，並且將debug設成0，輸出為`main_merged.c`。  
+**Important Note**: merge後的檔案是可以直接submit的，但僅會回答一種query。要merge前去`autoMerger.py`裡改`test_func`參數，設定你要測哪一種query。
+
+
 ## About DEBUG mode (To 西西 & 洪)
 
 我在`main.c`裡寫了一個debug mode，關於怎麼用我寫一點註解在code裏。要打開的話把code一開始的`#define DEBUG`設成1就好。  
@@ -27,9 +39,7 @@ This is the final project repo of Team 44 (峻瑋好帥) for DSA 2021 @ NTU CSIE
 
 ## To-do List (So far)
 
-1. group_analyze可以做path compression
-2. 檢查group_analyze的initialization是否有和其他兩個函數的initialization做重複的事
-3. 目前分成`.h`會比一個1000多行的`main.c`容易debug。但這樣每次要繳交要一直複製合併很麻煩。要寫一個可以自動把五份`.h`merge進main.c，可以直接拿去丟DSA Judge的(用Python or C, whatever)，方法目前我想的很簡單，只要根據`Include Structure`，把最底層在放在檔案前面，這樣merge應該就沒問題了(Jun: 這個我可以寫)。
+See [HackMD](https://hackmd.io/@Xr9r_83jRj64P3utQtN3zg/SkcugdM9d).
 
 
 
