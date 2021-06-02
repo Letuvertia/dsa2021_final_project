@@ -20,10 +20,12 @@ query *queries;
 int main (void) {
 	// Initialization
 	api.init(&n_mails, &n_queries, &mails, &queries);
-	HashTable* hashTables[10000];
-	hashTables_init(hashTables, 10000);
-	for (int mail_ctr = 0; mail_ctr < n_mails; mail_ctr++){
+	HashTable* hashTables[n_mails];
+	hashTables_init(hashTables, n_mails);
+	for (int mail_ctr = 6764; mail_ctr < 10000; mail_ctr++){
+		fprintf(stderr, "%d\n", mail_ctr);
 		hashTable_hashmail(hashTables[mail_ctr], mails[mail_ctr]);
+		//fprintf(stderr, "%d\n", mail_ctr);
 	}
 
 	// DEBUG MODE OFF

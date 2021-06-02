@@ -19,7 +19,7 @@
 struct HashTable;
 typedef struct HashTable HashTable;
 bool isDelimiter(char c);
-unsigned int hashString(unsigned char *s_begin, int s_len);
+unsigned int hashString(char *s_begin, int s_len);
 unsigned int hashString_inChain (char *s_begin, int s_len);
 void hashTables_init(HashTable* hashTable[], int table_n);
 void hashTable_hashParagraph(HashTable *hashTable, char *para);
@@ -34,10 +34,10 @@ bool hashTable_findToken_inputHash(HashTable *hashTable, unsigned int s_hash, un
 // ==== tool functions====
 
 /*
-(Jun): I think that there is no need to transform char to number
-       in hashString, because what hash funcitons do is to scamble
-       the bits to make it uniformly distributed. There is no diff
-       between 0 and 48 as a shift during hashing.
+//(Jun): I think that there is no need to transform char to number
+//       in hashString, because what hash funcitons do is to scamble
+//       the bits to make it uniformly distributed. There is no diff
+//       between 0 and 48 as a shift during hashing.
 int toNumberArray[1<<7];
 void toNumber_init() {
 	// 0-9 48-57
@@ -71,6 +71,7 @@ int isAlphaNumeric (char c){
 */
 
 
+
 bool isDelimiter(char c) {
     if (('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || ('0' <= c && c <= '9')) {
         return false;
@@ -80,7 +81,7 @@ bool isDelimiter(char c) {
 
 
 /*
-int hashString(char *s, int len) {
+unsigned int hashString(char *s, int len) {
     int ans = 0;
     for (int i = 0; i < len; i++) {
         ans = (ans * D_RabinKarp + toNumber(s[i])) % Q_RabinKarp;
@@ -92,7 +93,7 @@ int hashString(char *s, int len) {
 // (Jun): hash functions below are from 
 // 		  http://www.cse.yorku.ca/~oz/hash.html
 // (Jun): just testing out some other hash functions with bit arithmetic
-unsigned int hashString(unsigned char *s_begin, int s_len) {
+unsigned int hashString(char *s_begin, int s_len) {
 	unsigned int hash = 0;
 	for (int s_ctr=0; s_ctr<s_len; s_ctr++){
 		hash = s_begin[s_ctr] + (hash << 6) + (hash << 16) - hash;
@@ -136,15 +137,24 @@ void hashTables_init(HashTable *hashTables[], int table_n) {
 	for (int mail_ctr=0; mail_ctr<table_n; mail_ctr++){
 		hashTables[mail_ctr] = (HashTable *) malloc(sizeof(HashTable));
 		hashTables[mail_ctr]->chains = (unsigned int **) malloc(sizeof(unsigned int*)*HASH_M);
-		memset(hashTables[mail_ctr]->chainElementsN, 0, HASH_M*sizeof(char));
-		// (Jun): allocate the chain when needed
+		hashTables[mail_ctr]->tokenN = 0;
+		//memset(hashTables[mail_ctr]->chainElementsN, 0, sizeof(hashTables[mail_ctr]->chainElementsN));
 		/*
+		for (int m_ctr=0; m_ctr<HASH_M; m_ctr++)
+			hashTables[mail_ctr]->chainElementsN[m_ctr] = 0;
+		hashTables[mail_ctr]->tokenN = 0;
+		if (mail_ctr == 9772)
+			for(int i=0; i<HASH_M; i++)
+				fprintf(stderr, "M: %d => capa:%d, N:%d\n", i, hashTables[mail_ctr]->chainCapacity[i], hashTables[mail_ctr]->chainElementsN[i]);
+		*/
+		// (Jun): allocate the chain when needed
+		
 		for (int m_ctr=0; m_ctr<HASH_M; m_ctr++) {
 			hashTables[mail_ctr]->chains[m_ctr] = (unsigned int *) malloc(sizeof(unsigned int)*HASH_S);
 			hashTables[mail_ctr]->chainCapacity[m_ctr] = HASH_S;
 			hashTables[mail_ctr]->chainElementsN[m_ctr] = 0;
 		}
-		*/
+		
 	}
 }
 
@@ -155,10 +165,17 @@ void hashTable_hashmail(HashTable* hashTable, mail mail) {
 	//max_tokenN = (max_tokenN < hashTable->tokenN)? hashTable->tokenN: max_tokenN;
 }
 
-
+char verbose = 1;
 void hashTable_hashParagraph(HashTable *hashTable, char *para) {
 	// copied from "void initTokensFromString(TokenList* tokenList, char *T)" in
 	// anthony.h
+	verbose = 1;
+	char check[30] = "Michael Thomsett";
+	for (int i=0; i<strlen(check); i++)
+		if (para[i] != check[i]){
+			verbose = 0;
+			break;
+		}
 	for (int s = 0; para[s] != '\0'; s++) {
 		if ((s == 0 && isDelimiter(para[s])) || (s != 0 && !(isDelimiter(para[s-1]) && !isDelimiter(para[s]))))
 			continue;
@@ -167,7 +184,7 @@ void hashTable_hashParagraph(HashTable *hashTable, char *para) {
 		while (!isDelimiter(para[s+sLen])) {
 			sLen++;
 		}
-			
+
 		hashTable_pushToken(hashTable, para+s, sLen);
 		s += sLen;
 	}
@@ -175,27 +192,48 @@ void hashTable_hashParagraph(HashTable *hashTable, char *para) {
 
 
 void hashTable_pushToken(HashTable *hashTable, char *s_begin, int s_len) {
-	//fprintf(stderr, "push Token: ");
-	//for (int i=0; i<s_len; i++)
-	//	fprintf(stderr, "%c", s_begin[i]);
-	//fprintf(stderr, "\n");
+	if (verbose){
+		fprintf(stderr, "push Token: ");
+		for (int i=0; i<s_len; i++)
+			fprintf(stderr, "%c", s_begin[i]);
+		fprintf(stderr, "\n");
+	}
 
 	
 	unsigned int s_hash = hashString(s_begin, s_len) % HASH_M;
 	unsigned int s_hash_inChain = hashString_inChain(s_begin, s_len);
+	if (verbose){
+		for(int i=0; i<HASH_M; i++)
+			fprintf(stderr, "M: %d => capa:%d, N:%d\n", i, hashTable->chainCapacity[i], hashTable->chainElementsN[i]);
+	}
 
 	// check if the chain initialize
 	if (hashTable->chainElementsN[s_hash] == 0){
+		if(verbose)
+			fprintf(stderr, "fffs_hash: %d, s_hash_inChain: %u\n\n", s_hash, s_hash_inChain);
+		//fprintf(stderr, "s_hash: %d, s_hash_inChain: %u\n\n", s_hash, s_hash_inChain);
 		hashTable->chains[s_hash] = (unsigned int *) malloc(sizeof(unsigned int)*HASH_S);
-		hashTable->chainCapacity[s_hash] = HASH_S;
+		hashTable->chainCapacity[s_hash] = HASH_S;	
 	}
 
 	else{
+		if(verbose)
+			fprintf(stderr, "aaas_hash: %d, s_hash_inChain: %u\n\n", s_hash, s_hash_inChain);
+		if(verbose)
+			fprintf(stderr, "capa:%d, N:%d\n\n", hashTable->chainCapacity[s_hash], hashTable->chainElementsN[s_hash]);
 		// check whether the token repeated
-		for (int i=0; i<hashTable->chainElementsN[s_hash]; i++)
+		char j=0;
+		if(verbose)
+			fprintf(stderr, "<?:%d\n\n", (j<hashTable->chainCapacity[s_hash])?1:0);
+		for (char i=0; i<hashTable->chainElementsN[s_hash]; i++){
+			if(verbose)
+				fprintf(stderr, "%d: %u\n", i, hashTable->chains[s_hash][i]);
 			if (hashTable->chains[s_hash][i] == s_hash_inChain)
 				return;
-
+		}
+			
+		if(verbose)
+			fprintf(stderr, "capa:%d, N:%d\n\n", hashTable->chainCapacity[s_hash], hashTable->chainElementsN[s_hash]);
 		// enlarge
 		if (hashTable->chainCapacity[s_hash] == hashTable->chainElementsN[s_hash]) {
 			unsigned char newCapacity = (hashTable->chainElementsN[s_hash] * S_ENLARGE_RATIO > (CHAR_MAX*2+1))? 
@@ -205,16 +243,20 @@ void hashTable_pushToken(HashTable *hashTable, char *s_begin, int s_len) {
 			//fprintf(stderr, "enlarge chain from %d to %d\n", hashTable->chainCapacity[s_hash], newCapacity);
 			hashTable->chainCapacity[s_hash] = newCapacity;
 		}
+		if(verbose)
+			fprintf(stderr, "fwwws_hash: %d, s_hash_inChain: %u\n\n", s_hash, s_hash_inChain);
 	}
 	
 
 	hashTable->chains[s_hash][hashTable->chainElementsN[s_hash]] = s_hash_inChain;
 	hashTable->chainElementsN[s_hash]++;
-	//fprintf(stderr, "s_hash: %d, s_hash_inChain: %u\n\n", s_hash, s_hash_inChain);
+	if(verbose)
+		fprintf(stderr, "s_hash: %d, s_hash_inChain: %u\n\n", s_hash, s_hash_inChain);
 
 	hashTable->s_hashes[hashTable->tokenN] = s_hash;
 	hashTable->s_hashes_inChain[hashTable->tokenN] = s_hash_inChain;
 	hashTable->tokenN++;
+	//fprintf(stderr, "s_hash: %d, s_hash_inChain: %u\n\n", s_hash, s_hash_inChain);
 }
 
 
