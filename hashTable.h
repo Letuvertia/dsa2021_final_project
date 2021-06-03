@@ -22,6 +22,7 @@ bool isDelimiter(char c);
 unsigned int hashString(char *s_begin, int s_len);
 unsigned int hashString_inChain (char *s_begin, int s_len);
 void hashTables_init(HashTable* hashTable[], int table_n);
+void hashTable_hashmail(HashTable* hashTable, mail mail);  // (anthony): I add this missing declarations
 void hashTable_hashParagraph(HashTable *hashTable, char *para);
 void hashTable_pushToken(HashTable *hashTable, char *s_begin, int s_len);
 bool hashTable_findToken_inputString(HashTable *hashTable, char *s_begin, int s_len);

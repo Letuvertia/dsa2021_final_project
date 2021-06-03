@@ -5,11 +5,11 @@ from posixpath import join
 # CONFIGURATIONS
 # ==============
 # enter the path to your judge
-# path_to_judge_dir = r"C:\Users\user\Desktop\NTU_course\DSA\team40\51\main.c"
+# path_to_judge_dir = r"/Users/anthoni/Desktop/dsa/team40/51/main.c"
 
 # enter the function to want to test
 # 0/1/2 : expression/find/group
-test_func = 1
+test_func = 0
 
 
 # ============== 

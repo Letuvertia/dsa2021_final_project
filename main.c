@@ -30,7 +30,7 @@ int main (void) {
 
 	// DEBUG MODE OFF
 	if (!DEBUG){
-		for(int i = 0; i < n_mails; i++){
+		for(int i = 0; i < n_queries; i++){  // (anthony): n_queries insteads of n_mails.
 			// Mark3-0: call expression_match
 			if (queries[i].type == expression_match){
 				int *ans_arr = (int *) malloc(sizeof(int)*n_mails);
@@ -72,7 +72,7 @@ int main (void) {
 		// 1.2 Test specified queries by type
 		// set -1 if you wanna test all
 		// set -2 if you wanna test by qid
-		int testAllQueries = find_similar;
+		int testAllQueries = expression_match;
 		if (testAllQueries >= -1)
 			testedQueries_n = n_mails;
 		
