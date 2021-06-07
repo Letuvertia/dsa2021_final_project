@@ -19,12 +19,13 @@ query *queries;
 // Mark2: Functions definitions
 int main (void) {
 	// Initialization
+	toNumber_init();
 	api.init(&n_mails, &n_queries, &mails, &queries);
 	HashTable* hashTables[n_mails];
 	hashTables_init(hashTables, n_mails);
 	//hashTable_hashmail(hashTables[3320], mails[3320]); 
 	for (int mail_ctr = 0; mail_ctr < n_mails; mail_ctr++){
-		// fprintf(stderr, "%d\n", mail_ctr);
+		fprintf(stderr, "%d\n", mail_ctr);
 		hashTable_hashmail(hashTables[mail_ctr], mails[mail_ctr]);
 	}
 

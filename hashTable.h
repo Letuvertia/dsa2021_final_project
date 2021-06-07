@@ -19,7 +19,7 @@
 struct HashTable;
 typedef struct HashTable HashTable;
 bool isDelimiter(char c);
-unsigned short int hashString(char *s_begin, int s_len);
+int hashString(char *s_begin, int s_len);
 unsigned int hashString_inChain (char *s_begin, int s_len);
 void hashTables_init(HashTable* hashTable[], int table_n);
 void hashTable_hashmail(HashTable* hashTable, mail mail);  // (anthony): I add this missing declarations
@@ -29,12 +29,11 @@ bool hashTable_findToken_inputString(HashTable *hashTable, char *s_begin, int s_
 bool hashTable_findToken_inputHash(HashTable *hashTable, unsigned short int s_hash, unsigned int s_hash_inChain);
 
 
-
 // Mark2: Functions definitions
 
 // ==== tool functions====
 
-/*
+
 //(Jun): I think that there is no need to transform char to number
 //       in hashString, because what hash funcitons do is to scamble
 //       the bits to make it uniformly distributed. There is no diff
@@ -69,8 +68,6 @@ int isAlphaNumeric (char c){
 		return 1;
 	return 0;
 }
-*/
-
 
 
 bool isDelimiter(char c) {
@@ -81,26 +78,26 @@ bool isDelimiter(char c) {
 }
 
 
-/*
-unsigned int hashString(char *s, int len) {
+int hashString(char *s, int len) {
     int ans = 0;
     for (int i = 0; i < len; i++) {
         ans = (ans * D_RabinKarp + toNumber(s[i])) % Q_RabinKarp;
     }
     return ans;
-}*/
+}
 
 
+/*
 // (Jun): hash functions below are from 
 // 		  http://www.cse.yorku.ca/~oz/hash.html
 // (Jun): just testing out some other hash functions with bit arithmetic
-unsigned short int hashString(char *s_begin, int s_len) {
+int hashString(char *s_begin, int s_len) {
 	unsigned short int hash = 0;
 	for (int s_ctr=0; s_ctr<s_len; s_ctr++){
 		hash = s_begin[s_ctr] + (hash << 6) + (hash << 16) - hash;
 	}
 	return hash;
-}
+}*/
 
 
 unsigned int hashString_inChain (char *s_begin, int s_len){
@@ -123,20 +120,19 @@ void printstr(char *s, int s_len) {
 
 
 // ==== functions for HashTable ====
-
 typedef struct HashTable {
 	// for debug
 	char str[TOKENS_MAX_N][50];
     // chaining hash table
     // please note that this is a hashTable for ONE mail.
 	// unsigned short int range: 0 ~ 65,535
-	unsigned short int chainCapacity[HASH_M];
-	unsigned short int chainElementsN[HASH_M];
+	int chainCapacity[HASH_M];
+	int chainElementsN[HASH_M];
 
 	int tokenN;
 	// (Jun): store hashes of each token in the original order
 	//        to avoid repeated hashing
-	unsigned short int s_hashes[TOKENS_MAX_N]; 
+	int s_hashes[TOKENS_MAX_N]; 
 	unsigned int s_hashes_inChain[TOKENS_MAX_N];
 	unsigned int *chains[HASH_M];
 } HashTable;
@@ -148,7 +144,12 @@ void hashTables_init(HashTable *hashTables[], int table_n) {
 		hashTables[mail_ctr] = (HashTable *) malloc(sizeof(HashTable));
 		hashTables[mail_ctr]->tokenN = 0;
 		// (Jun): allocate the chain when needed
-		memset(hashTables[mail_ctr]->chainElementsN, 0, sizeof(unsigned short int)*HASH_M);
+		// memset(hashTables[mail_ctr]->chainElementsN, 0, sizeof(unsigned short int)*HASH_M);
+		for (int i=0; i<HASH_M; i++) {
+			hashTables[mail_ctr]->chains[i] = (unsigned int *) malloc(sizeof(unsigned int)*HASH_S);
+			hashTables[mail_ctr]->chainElementsN[i] = 0;
+			hashTables[mail_ctr]->chainCapacity[i] = HASH_S;
+		}
 	}
 }
 
@@ -182,13 +183,13 @@ void hashTable_pushToken(HashTable *hashTable, char *s_begin, int s_len) {
 	//fprintf(stderr, "push Token: ");
 	//printstr(s_begin, s_len);
 	//fprintf(stderr, "\n"); return;
-	unsigned short int s_hash = hashString(s_begin, s_len) % HASH_M;
+	unsigned short int s_hash = (unsigned short int)(hashString(s_begin, s_len) % HASH_M);
 	unsigned int s_hash_inChain = hashString_inChain(s_begin, s_len);
 	//fprintf(stderr, "hash %hu, hash_inChain %u, N: %hu\n", s_hash, s_hash_inChain, hashTable->chainElementsN[s_hash]);
 
 	// check if the chain allocated
 	if (hashTable->chainElementsN[s_hash] == 0){
-		hashTable->chains[s_hash] = (unsigned int *) malloc(sizeof(unsigned int)*HASH_S);
+		// hashTable->chains[s_hash] = (unsigned int *) malloc(sizeof(unsigned int)*HASH_S);
 		hashTable->chainCapacity[s_hash] = HASH_S;	
 	}
 
@@ -202,6 +203,8 @@ void hashTable_pushToken(HashTable *hashTable, char *s_begin, int s_len) {
 				printstr(s_begin, s_len);
 				fprintf(stderr, "\"\n");
 				*/
+
+				
 				for (int j=0; j<s_len; j++) {
 					if (s_begin[j] != hashTable->str[hashTable->chains[s_hash][2*i+1]][j]) {
 						fprintf(stderr, "UNMATCH!!! same hash\n");
@@ -214,6 +217,7 @@ void hashTable_pushToken(HashTable *hashTable, char *s_begin, int s_len) {
 						break;
 					}
 				}
+
 				//fprintf(stderr, " (end)\n");
 				return;
 			}
@@ -295,6 +299,7 @@ bool hashTable_findToken_inputString(HashTable *hashTable, char *s_begin, int s_
 
 
 bool hashTable_findToken_inputHash(HashTable *hashTable, unsigned short int s_hash, unsigned int s_hash_inChain) {
+	// fprintf(stderr, "%hu, %u", s_hash, s_hash_inChain);
     if (hashTable->chainElementsN[s_hash] == 0)
         return 0;
     for (unsigned short s_ctr=0; s_ctr < hashTable->chainElementsN[s_hash]; s_ctr++) {
