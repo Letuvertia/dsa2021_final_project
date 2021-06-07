@@ -1,6 +1,12 @@
 main.exe
 output.txt
 JudgeInfo.txt
+cmd.txt
+main_merged.c
+main_merged.exe
+malloc_test.c
+malloc_test.exe
+union_inter.py
 
 test_env/
 .vscode/

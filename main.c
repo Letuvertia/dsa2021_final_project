@@ -14,7 +14,7 @@ query *queries;
 
 // debug config
 #define DEBUG 1
-
+// I am from the future to save you from RE.
 
 int main (void) {
 	// Initialization
