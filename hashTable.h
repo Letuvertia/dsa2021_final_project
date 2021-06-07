@@ -4,10 +4,10 @@
 #include <stdbool.h>
 #include <limits.h>
 
-#define HASH_M 100 // unsigned long (4 bytes) * HASH_M = memory used for one mail
-#define HASH_S 1
+#define HASH_M 10000 // unsigned long (4 bytes) * HASH_M = memory used for one mail
+#define HASH_S 2
 #define TOKENS_MAX_N 3500 // mid 9771 (start from 0) has the most tokens of 3416.
-#define S_ENLARGE_RATIO 3
+#define S_ENLARGE_RATIO 4
 
 #define Q_RabinKarp 59650000
 #define D_RabinKarp 36
@@ -19,14 +19,14 @@
 struct HashTable;
 typedef struct HashTable HashTable;
 bool isDelimiter(char c);
-unsigned int hashString(char *s_begin, int s_len);
+unsigned short int hashString(char *s_begin, int s_len);
 unsigned int hashString_inChain (char *s_begin, int s_len);
 void hashTables_init(HashTable* hashTable[], int table_n);
 void hashTable_hashmail(HashTable* hashTable, mail mail);  // (anthony): I add this missing declarations
 void hashTable_hashParagraph(HashTable *hashTable, char *para);
-void hashTable_pushToken(HashTable *hashTable, char *s_begin, int s_len);
+void hashTable_pushToken(HashTable *hashTable, char *s_begin, int s_len); 
 bool hashTable_findToken_inputString(HashTable *hashTable, char *s_begin, int s_len);
-bool hashTable_findToken_inputHash(HashTable *hashTable, unsigned int s_hash, unsigned int s_hash_inChain);
+bool hashTable_findToken_inputHash(HashTable *hashTable, unsigned short int s_hash, unsigned int s_hash_inChain);
 
 
 
@@ -94,8 +94,8 @@ unsigned int hashString(char *s, int len) {
 // (Jun): hash functions below are from 
 // 		  http://www.cse.yorku.ca/~oz/hash.html
 // (Jun): just testing out some other hash functions with bit arithmetic
-unsigned int hashString(char *s_begin, int s_len) {
-	unsigned int hash = 0;
+unsigned short int hashString(char *s_begin, int s_len) {
+	unsigned short int hash = 0;
 	for (int s_ctr=0; s_ctr<s_len; s_ctr++){
 		hash = s_begin[s_ctr] + (hash << 6) + (hash << 16) - hash;
 	}
@@ -116,20 +116,29 @@ unsigned int hashString_inChain (char *s_begin, int s_len){
 }
 
 
+void printstr(char *s, int s_len) {
+	for (int i=0; i<s_len; i++)
+		fprintf(stderr, "%c", s[i]);
+}
+
+
 // ==== functions for HashTable ====
 
 typedef struct HashTable {
+	// for debug
+	char str[TOKENS_MAX_N][50];
     // chaining hash table
     // please note that this is a hashTable for ONE mail.
-	unsigned int **chains;
-	unsigned char chainCapacity[HASH_M]; // using char just for saving memory
-	unsigned char chainElementsN[HASH_M];
+	// unsigned short int range: 0 ~ 65,535
+	unsigned short int chainCapacity[HASH_M];
+	unsigned short int chainElementsN[HASH_M];
 
 	int tokenN;
 	// (Jun): store hashes of each token in the original order
 	//        to avoid repeated hashing
-	unsigned int s_hashes[TOKENS_MAX_N]; 
+	unsigned short int s_hashes[TOKENS_MAX_N]; 
 	unsigned int s_hashes_inChain[TOKENS_MAX_N];
+	unsigned int *chains[HASH_M];
 } HashTable;
 
 
@@ -137,27 +146,12 @@ void hashTables_init(HashTable *hashTables[], int table_n) {
 	// this function initialize a HashTable pointer of n mails.
 	for (int mail_ctr=0; mail_ctr<table_n; mail_ctr++){
 		hashTables[mail_ctr] = (HashTable *) malloc(sizeof(HashTable));
-		hashTables[mail_ctr]->chains = (unsigned int **) malloc(sizeof(unsigned int*)*HASH_M);
 		hashTables[mail_ctr]->tokenN = 0;
-		//memset(hashTables[mail_ctr]->chainElementsN, 0, sizeof(hashTables[mail_ctr]->chainElementsN));
-		/*
-		for (int m_ctr=0; m_ctr<HASH_M; m_ctr++)
-			hashTables[mail_ctr]->chainElementsN[m_ctr] = 0;
-		hashTables[mail_ctr]->tokenN = 0;
-		if (mail_ctr == 9772)
-			for(int i=0; i<HASH_M; i++)
-				fprintf(stderr, "M: %d => capa:%d, N:%d\n", i, hashTables[mail_ctr]->chainCapacity[i], hashTables[mail_ctr]->chainElementsN[i]);
-		*/
 		// (Jun): allocate the chain when needed
-		
-		for (int m_ctr=0; m_ctr<HASH_M; m_ctr++) {
-			hashTables[mail_ctr]->chains[m_ctr] = (unsigned int *) malloc(sizeof(unsigned int)*HASH_S);
-			hashTables[mail_ctr]->chainCapacity[m_ctr] = HASH_S;
-			hashTables[mail_ctr]->chainElementsN[m_ctr] = 0;
-		}
-		
+		memset(hashTables[mail_ctr]->chainElementsN, 0, sizeof(unsigned short int)*HASH_M);
 	}
 }
+
 
 //int max_tokenN = -1;
 void hashTable_hashmail(HashTable* hashTable, mail mail) {
@@ -166,17 +160,9 @@ void hashTable_hashmail(HashTable* hashTable, mail mail) {
 	//max_tokenN = (max_tokenN < hashTable->tokenN)? hashTable->tokenN: max_tokenN;
 }
 
-char verbose = 1;
+
 void hashTable_hashParagraph(HashTable *hashTable, char *para) {
-	// copied from "void initTokensFromString(TokenList* tokenList, char *T)" in
-	// anthony.h
-	verbose = 1;
-	char check[30] = "Michael Thomsett";
-	for (int i=0; i<strlen(check); i++)
-		if (para[i] != check[i]){
-			verbose = 0;
-			break;
-		}
+	// copied from "void initTokensFromString(TokenList* tokenList, char *T)" in anthony.h
 	for (int s = 0; para[s] != '\0'; s++) {
 		if ((s == 0 && isDelimiter(para[s])) || (s != 0 && !(isDelimiter(para[s-1]) && !isDelimiter(para[s]))))
 			continue;
@@ -193,76 +179,111 @@ void hashTable_hashParagraph(HashTable *hashTable, char *para) {
 
 
 void hashTable_pushToken(HashTable *hashTable, char *s_begin, int s_len) {
-	if (verbose){
-		fprintf(stderr, "push Token: ");
-		for (int i=0; i<s_len; i++)
-			fprintf(stderr, "%c", s_begin[i]);
-		fprintf(stderr, "\n");
-	}
-
-	
-	unsigned int s_hash = hashString(s_begin, s_len) % HASH_M;
+	//fprintf(stderr, "push Token: ");
+	//printstr(s_begin, s_len);
+	//fprintf(stderr, "\n"); return;
+	unsigned short int s_hash = hashString(s_begin, s_len) % HASH_M;
 	unsigned int s_hash_inChain = hashString_inChain(s_begin, s_len);
-	if (verbose){
-		for(int i=0; i<HASH_M; i++)
-			fprintf(stderr, "M: %d => capa:%d, N:%d\n", i, hashTable->chainCapacity[i], hashTable->chainElementsN[i]);
-	}
+	//fprintf(stderr, "hash %hu, hash_inChain %u, N: %hu\n", s_hash, s_hash_inChain, hashTable->chainElementsN[s_hash]);
 
-	// check if the chain initialize
+	// check if the chain allocated
 	if (hashTable->chainElementsN[s_hash] == 0){
-		if(verbose)
-			fprintf(stderr, "fffs_hash: %d, s_hash_inChain: %u\n\n", s_hash, s_hash_inChain);
-		//fprintf(stderr, "s_hash: %d, s_hash_inChain: %u\n\n", s_hash, s_hash_inChain);
 		hashTable->chains[s_hash] = (unsigned int *) malloc(sizeof(unsigned int)*HASH_S);
 		hashTable->chainCapacity[s_hash] = HASH_S;	
 	}
 
 	else{
-		if(verbose)
-			fprintf(stderr, "aaas_hash: %d, s_hash_inChain: %u\n\n", s_hash, s_hash_inChain);
-		if(verbose)
-			fprintf(stderr, "capa:%d, N:%d\n\n", hashTable->chainCapacity[s_hash], hashTable->chainElementsN[s_hash]);
 		// check whether the token repeated
-		char j=0;
-		if(verbose)
-			fprintf(stderr, "<?:%d\n\n", (j<hashTable->chainCapacity[s_hash])?1:0);
-		for (char i=0; i<hashTable->chainElementsN[s_hash]; i++){
-			if(verbose)
-				fprintf(stderr, "%d: %u\n", i, hashTable->chains[s_hash][i]);
-			if (hashTable->chains[s_hash][i] == s_hash_inChain)
+		for (unsigned short i=0; i<hashTable->chainElementsN[s_hash]/2; i++){
+			if (hashTable->chains[s_hash][2*i] == s_hash_inChain){
+				/*
+				fprintf(stderr, "hash %hu, hash_inChain %u, N: %hu\n", s_hash, s_hash_inChain, hashTable->chainElementsN[s_hash]);
+				fprintf(stderr, "find \"%s\" repeat with \"", hashTable->str[hashTable->chains[s_hash][2*i+1]]);
+				printstr(s_begin, s_len);
+				fprintf(stderr, "\"\n");
+				*/
+				for (int j=0; j<s_len; j++) {
+					if (s_begin[j] != hashTable->str[hashTable->chains[s_hash][2*i+1]][j]) {
+						fprintf(stderr, "UNMATCH!!! same hash\n");
+						fprintf(stderr, "first appear: %d\n", hashTable->chains[s_hash][2*i+1]);
+						fprintf(stderr, "hash %hu, hash_inChain %u, N: %hu\n", s_hash, s_hash_inChain, hashTable->chainElementsN[s_hash]);
+						fprintf(stderr, "find \"%s\" repeat with \"", hashTable->str[hashTable->chains[s_hash][2*i+1]]);
+						printstr(hashTable->str[hashTable->chains[s_hash][2*i+1]], s_len);
+						printstr(s_begin, s_len);
+						fprintf(stderr, "\"\n\n");
+						break;
+					}
+				}
+				//fprintf(stderr, " (end)\n");
 				return;
+			}
 		}
-			
-		if(verbose)
-			fprintf(stderr, "capa:%d, N:%d\n\n", hashTable->chainCapacity[s_hash], hashTable->chainElementsN[s_hash]);
+
+		//fprintf(stderr, "not repeat (end)\n");
 		// enlarge
 		if (hashTable->chainCapacity[s_hash] == hashTable->chainElementsN[s_hash]) {
-			unsigned char newCapacity = (hashTable->chainElementsN[s_hash] * S_ENLARGE_RATIO > (CHAR_MAX*2+1))? 
-				(CHAR_MAX*2+1) : hashTable->chainElementsN[s_hash] * S_ENLARGE_RATIO;
+			unsigned short int newCapacity = (hashTable->chainElementsN[s_hash] * S_ENLARGE_RATIO > TOKENS_MAX_N)? 
+				TOKENS_MAX_N : hashTable->chainElementsN[s_hash] * S_ENLARGE_RATIO;
 			hashTable->chains[s_hash] 
 				= (unsigned int *) realloc(hashTable->chains[s_hash], sizeof(unsigned int)*newCapacity);
 			//fprintf(stderr, "enlarge chain from %d to %d\n", hashTable->chainCapacity[s_hash], newCapacity);
 			hashTable->chainCapacity[s_hash] = newCapacity;
 		}
-		if(verbose)
-			fprintf(stderr, "fwwws_hash: %d, s_hash_inChain: %u\n\n", s_hash, s_hash_inChain);
+		//fprintf(stderr, " (end)\n");
 	}
-	
 
-	hashTable->chains[s_hash][hashTable->chainElementsN[s_hash]] = s_hash_inChain;
-	hashTable->chainElementsN[s_hash]++;
-	if(verbose)
-		fprintf(stderr, "s_hash: %d, s_hash_inChain: %u\n\n", s_hash, s_hash_inChain);
+	/*
+	if (hashTable->tokenN == 3500){
+		printstr(hashTable->str[0], 5); fprintf(stderr, "\n");
+		printstr(s_begin, s_len); fprintf(stderr, "\n");
+		fprintf(stderr, "hash %hu, hash_inChain %u, N: %hu\n", s_hash, s_hash_inChain, hashTable->chainElementsN[s_hash]);
+		printstr(hashTable->str[0], 5); fprintf(stderr, "\n");
+		fprintf(stderr, "Hamas in table: hash_inChain: %u\n", hashTable->chains[3510][0]);
+	}*/
+	hashTable->chains[s_hash][hashTable->chainElementsN[s_hash]++] = s_hash_inChain;
+	hashTable->chains[s_hash][hashTable->chainElementsN[s_hash]++] = (unsigned int) hashTable->tokenN;
+	/*
+	if (hashTable->tokenN == 3500){
+		fprintf(stderr, "fdsa: ");
+		printstr(hashTable->str[0], 5); fprintf(stderr, "\n");
+		fprintf(stderr, "Hamas in table: hash_inChain: %u\n", hashTable->chains[3510][0]);
+	}*/
+		
 
 	hashTable->s_hashes[hashTable->tokenN] = s_hash;
 	hashTable->s_hashes_inChain[hashTable->tokenN] = s_hash_inChain;
+	/*
+	if (hashTable->tokenN == 3500){
+		fprintf(stderr, "eeeeefdsa: ");
+		printstr(hashTable->str[0], 5); fprintf(stderr, "\n");
+	}*/
+		
+	for (int s=0; s<s_len; s++) {
+		hashTable->str[hashTable->tokenN][s] = s_begin[s];
+	}
+	hashTable->str[hashTable->tokenN][s_len] = '\0';
+	//fprintf(stderr, "tokenN %d: ", hashTable->tokenN); printstr(hashTable->str[0], 5); fprintf(stderr, "\n");
+	/*
+	char hamas[6] = "Hamas";
+	for (int i=0; i<5; i++){
+		if (hamas[i] != s_begin[i]){
+			break;
+		}
+		if (i == 4){
+			printstr(hashTable->str[hashTable->chains[s_hash][2*i+1]], s_len);
+			exit(-1);
+		}
+	}*/
+		
+	//fprintf(stderr, "%s (end)\n", hashTable->str[hashTable->tokenN]);
+	
 	hashTable->tokenN++;
-	//fprintf(stderr, "s_hash: %d, s_hash_inChain: %u\n\n", s_hash, s_hash_inChain);
+	
 }
 
 
 bool hashTable_findToken_inputString(HashTable *hashTable, char *s_begin, int s_len) {
-    unsigned int s_hash = hashString(s_begin, s_len) % HASH_M;
+    unsigned short int s_hash = hashString(s_begin, s_len) % HASH_M;
     unsigned int s_hash_inChain = hashString_inChain(s_begin, s_len);
 	//fprintf(stderr, "push Token: ");
 	//for (int i=0; i<s_len; i++)
@@ -273,12 +294,13 @@ bool hashTable_findToken_inputString(HashTable *hashTable, char *s_begin, int s_
 }
 
 
-bool hashTable_findToken_inputHash(HashTable *hashTable, unsigned int s_hash, unsigned int s_hash_inChain) {
+bool hashTable_findToken_inputHash(HashTable *hashTable, unsigned short int s_hash, unsigned int s_hash_inChain) {
     if (hashTable->chainElementsN[s_hash] == 0)
         return 0;
-    for (int s_ctr=0; s_ctr < hashTable->chainElementsN[s_hash]; s_ctr++) {
+    for (unsigned short s_ctr=0; s_ctr < hashTable->chainElementsN[s_hash]; s_ctr++) {
         if (hashTable->chains[s_hash][s_ctr] == s_hash_inChain)
-            return 1;
+        	return 1;
+		s_ctr++;
     }
     return 0;
 }

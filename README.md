@@ -42,7 +42,6 @@ autoMerger會自動merge好，並且將debug設成0，輸出為`main_merged.c`�
 See [HackMD](https://hackmd.io/@Xr9r_83jRj64P3utQtN3zg/SkcugdM9d).
 
 
-
 ## test env
 
 The testdata was generated with the 10000 mails.  
