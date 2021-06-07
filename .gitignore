@@ -3,6 +3,10 @@ output.txt
 JudgeInfo.txt
 main_merged.c
 main_merged.exe
+malloc_test.c
+malloc_test.exe
+union_inter.py
+cmd.txt
 
 test_env/
 .vscode/
