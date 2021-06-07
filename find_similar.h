@@ -4,6 +4,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+// Mark1: Functions declarations 
+
+int findSimilar_solve (int *ans_arr, HashTable* hashTables[], int mid, double thres);
+
 // Mark2: Functions definitions
 
 int findSimilar_solve (int *ans_arr, HashTable* hashTables[], int mid, double thres){
