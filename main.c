@@ -43,7 +43,7 @@ int main (void) {
 
 	// DEBUG MODE OFF
 	if (!DEBUG){
-		for(int i = 0; i < n_mails; i++){
+		for(int i = 0; i < n_queries; i++){
 			if (queries[i].type == expression_match){
 				int *ans_arr = (int *) malloc(sizeof(int)*n_mails);
 				int ans_len = expressionMatch(queries[i].data.expression_match_data.expression, ans_arr, hashTables);

@@ -34,7 +34,7 @@ int findSimilar_solve (int *ans_arr, HashTable* hashTables[], int mid, double th
 		//			 - 2021, 半夜在寫扣的人
 		HashTable *hashTable_lessToken;
 		HashTable *hashTable_moreToken;
-		if (hashTables[mid]->tokenN > hashTables[mail_ctr]){
+		if (hashTables[mid]->tokenN > hashTables[mail_ctr]->tokenN){
 			hashTable_lessToken = hashTables[mail_ctr];
 			hashTable_moreToken = hashTables[mid];
 		}
