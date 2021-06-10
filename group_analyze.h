@@ -113,7 +113,13 @@ int hash_GroupAnalyze(char *a){		//記得傳來得要'\0'結尾
 		return 4801;
 	return value - 24;
 }
-
+set *pathCompression(set *m){
+	if(m != m->h){
+		m->h = pathCompression(m->h);
+		return m->h;
+	}else
+		return m;
+}
 set *findSet(char *a){		
 	int ind = hash_GroupAnalyze(a);
 	set *m = &DJ[ind];
@@ -124,9 +130,7 @@ set *findSet(char *a){
 	
 	if (m->h == NULL || m->h == m)
 		return m;
-
-	while(m->h != m)			//向上找set 要用path compression
-		m = m->h;
+	pathCompression(m);
 	
 	return m;
 }
