@@ -79,7 +79,7 @@ int main (void) {
 		// 1.2 Test specified queries by type
 		// set -1 if you wanna test all
 		// set -2 if you wanna test by qid
-		int testAllQueries = find_similar;
+		int testAllQueries = expression_match;
 		if (testAllQueries >= -1)
 			testedQueries_n = n_mails;
 		
