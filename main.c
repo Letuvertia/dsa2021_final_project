@@ -13,7 +13,7 @@ query *queries;
 #include "find_similar.h"
 
 // debug config
-#define DEBUG 1 
+#define DEBUG 1
 
 
 // Mark2: Functions definitions
@@ -51,7 +51,7 @@ int main (void) {
 			// Mark3-2: call group_analyse
 			if (queries[i].type == group_analyse){
 				int *ans_arr = (int *) malloc(sizeof(int)*2);
-				GA(ans_arr, queries[i].data.group_analyse_data.len,queries[i].data.group_analyse_data.mids,mails);
+				ans_arr = GA(queries[i].data.group_analyse_data.len,queries[i].data.group_analyse_data.mids,mails);
 				api.answer(queries[i].id, ans_arr, 2);
 			}
 
@@ -184,7 +184,7 @@ int main (void) {
 			if (queries[i].type == group_analyse){
 				// print your debug info in your functions if needed
 				int *ans_arr = (int *) malloc(sizeof(int)*2);
-				GA(ans_arr, queries[i].data.group_analyse_data.len,queries[i].data.group_analyse_data.mids,mails);
+				ans_arr = GA(queries[i].data.group_analyse_data.len,queries[i].data.group_analyse_data.mids,mails);
 				api.answer(queries[i].id, ans_arr, 2);
 				if (outputAns){
 					fprintf(outFile, "%d:", i);
