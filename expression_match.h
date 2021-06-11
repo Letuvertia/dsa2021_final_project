@@ -9,7 +9,8 @@
 
 // Main functions
 int expressionMatch(char *expr, int *ans_arr, HashTable *hashTables[]);
-bool compute(char *expr, int lenExpr, int mailId, HashTable *hashTables[]);
+bool compute(char *expr, int lenExpr, int mailId, HashTable *hashTables[],
+    int hashedTokens[], unsigned int hashedInChainTokens[], int exprTokenLens[]);
 
 // Tool functions
 int operatorLevel(char);
@@ -75,8 +76,27 @@ char charStack_top(CharStack *cs) {
 int expressionMatch(char *expr, int *ans_arr, HashTable *hashTables[]) {
     int ans_len = 0;
 	int lenExpr = strlen(expr);
+    int hashedTokens[2048], exprTokenCnt = 0;
+    unsigned int hashedInChainTokens[2048];
+    int exprTokenLens[2048];
+    for (int i = 0; i < lenExpr; i++) {
+        if (isDelimiter(expr[i]))
+            continue;
+        int tokenLen = 0;
+        while (i+tokenLen < lenExpr && !isDelimiter(expr[i+tokenLen])) {
+            tokenLen++;
+        }
+        int s_hash = hashString(expr+i, tokenLen) % HASH_M;
+        unsigned int s_hash_inChain = hashString_inChain(expr+i, tokenLen);
+        hashedTokens[exprTokenCnt] = s_hash;
+        hashedInChainTokens[exprTokenCnt] = s_hash_inChain;
+        exprTokenLens[exprTokenCnt] = tokenLen;
+        exprTokenCnt++;
+        i += tokenLen - 1;
+    }
+    
     for (int i = 0; i < n_mails; i++) {
-        if (compute(expr, lenExpr, i, hashTables)) {
+        if (compute(expr, lenExpr, i, hashTables, hashedTokens, hashedInChainTokens, exprTokenLens)) {
             ans_arr[ans_len++] = i;
         }
     }
@@ -84,11 +104,13 @@ int expressionMatch(char *expr, int *ans_arr, HashTable *hashTables[]) {
 }
 
 
-bool compute(char *expr, int lenExpr, int mailId, HashTable *hashTables[]) {
+bool compute(char *expr, int lenExpr, int mailId, HashTable *hashTables[],
+    int hashedTokens[], unsigned int hashedInChainTokens[], int exprTokenLens[]) {
     // () -> NOT -> AND -> OR
     CharStack boolStack, operStack;
     charStack_init(&boolStack);
     charStack_init(&operStack);
+    int exprTokenCnt = 0;
     for (int i = 0; i < lenExpr; i++) {
         // printf("\n");
         // charStack_print(&boolStack);
@@ -131,15 +153,12 @@ bool compute(char *expr, int lenExpr, int mailId, HashTable *hashTables[]) {
             charStack_push(&operStack, '&');
         }
         else {  // reach a token
-            int tokenLen = 0;
-            while (i+tokenLen < lenExpr && !isDelimiter(expr[i+tokenLen])) {
-                tokenLen++;
-            }
-            
             // (Jun): I changed findToken() into using hashTable
             // char charPushed = findToken(token, lenToken, mailId)?1:0;
-            char charPushed = hashTable_findToken_inputString(hashTables[mailId], expr+i, tokenLen)?1:0;
-            i += tokenLen - 1;
+            char charPushed = hashTable_findToken_inputHash(hashTables[mailId]
+                , hashedTokens[exprTokenCnt], hashedInChainTokens[exprTokenCnt])?1:0;
+            i += exprTokenLens[exprTokenCnt] - 1;
+            exprTokenCnt++;
             charStack_push(&boolStack, charPushed);
         }
         while (operStack.size > 0) {  // size larger than 1
