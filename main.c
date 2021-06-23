@@ -25,6 +25,9 @@ mail *mails;
 query *queries;
 
 
+// debug config
+#define DEBUG 1
+
 // ======= tools =======
 
 void toNumber_init() {

@@ -7,6 +7,7 @@ main_merged.exe
 malloc_test.c
 malloc_test.exe
 union_inter.py
+find_similar_main.exe
 
 test_env/
 .vscode/
