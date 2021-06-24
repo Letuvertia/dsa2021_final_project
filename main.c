@@ -65,7 +65,7 @@ int hashString(char *s, int len) {
     return ans;
 }
 
-// (Jun): I found hash function samples from 
+// (Jun): I found some hash function samples from 
 // 		  http://www.cse.yorku.ca/~oz/hash.html
 unsigned int hashString_inChain (char *s_begin, int s_len){
 	// used "within a chain". That is, used only when different string 
