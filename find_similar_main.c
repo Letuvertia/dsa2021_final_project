@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <limits.h>
 
-#define MOD_BIT 15
+#define MOD_BIT 16
 #define HASH_M 1<<MOD_BIT
 #define TOKENS_MAX_N 3500 // mid 9771 (start from 0) has the most tokens of 3416.
 
@@ -36,7 +36,7 @@ bool isDelimiter(char c) {
 
 // ref: http://www.cse.yorku.ca/~oz/hash.html
 // SDBM
-short hashString(char *s_begin, int s_len) {
+unsigned short hashString(char *s_begin, int s_len) {
 	int hash = 0;
 	for (int s_ctr=0; s_ctr<s_len; s_ctr++){
 		hash = toNumberArray[s_begin[s_ctr]] + (hash << 6) + (hash << 16) - hash;
@@ -45,6 +45,7 @@ short hashString(char *s_begin, int s_len) {
 	return hash & ((1<<MOD_BIT) - 1);
 }
 
+/*
 // quadratic; c1, c2
 #define C1 3
 #define C2 6
@@ -60,7 +61,7 @@ short hashString_doubleprobe(short s_hash, unsigned int s_hash_inbox, unsigned i
 	short probe_shift = (short) k*(s_hash_inbox&((1<<10)-1));
 	//fprintf(stderr, "second hash shift: %d\n", (s_hash + probe_shift));
 	return (s_hash + probe_shift) & ((1<<MOD_BIT) - 1);
-}
+}*/
 
 // ref: http://www.cse.yorku.ca/~oz/hash.html
 // djb2
@@ -94,7 +95,7 @@ typedef struct HashTable {
 	//char boxes_string[HASH_M][50];
 	char boxes_occupied[HASH_M]; // check if the box is occupied
 
-	short s_hashes[TOKENS_MAX_N];
+	unsigned short s_hashes[TOKENS_MAX_N];
 	unsigned int s_hashes_inbox[TOKENS_MAX_N];
 	//char *str_ptr[TOKENS_MAX_N];
 	//char s_ver[TOKENS_MAX_N][2];
@@ -104,12 +105,12 @@ HashTable hashTables[10010];
 int token_pushctr;
 
 //bool hashTable_findToken_inputHash(int tid, short s_hash, unsigned int s_hash_inbox, char ori_s[], char s_ver[2]) {
-bool hashTable_findToken_inputHash(int tid, short s_hash, unsigned int s_hash_inbox) {
+bool hashTable_findToken_inputHash(int tid, unsigned short s_hash, unsigned int s_hash_inbox) {
 	//fprintf(stderr, "check %s in mail %d\n", ori_s, tid);
 	//fprintf(stderr, "first probe: %u\n", s_hash);
 	if (hashTables[tid].boxes_occupied[s_hash] == 0)
 		return 0;
-	unsigned int k=0; short tmp_hash = s_hash, probe_shift = (short) (s_hash_inbox&((1<<10)-1))+1;
+	unsigned int k=0; unsigned short tmp_hash = s_hash, probe_shift = (unsigned short) (s_hash_inbox&((1<<10)-1))+1;
 	// fprintf(stderr, "s:%d, s_inbox:%u, shift:%d\n", s_hash, s_hash_inbox, probe_shift);
 	// fprintf(stderr, "k=%d, probe: %d\n", k, tmp_hash);
 	while (hashTables[tid].boxes_occupied[tmp_hash] == 1 && hashTables[tid].boxes[tmp_hash] != s_hash_inbox) {
@@ -136,7 +137,7 @@ bool hashTable_findToken_inputHash(int tid, short s_hash, unsigned int s_hash_in
 }
 
 bool hashTable_findToken_inputString(int tid, char *s_begin, int s_len) {
-    short s_hash = hashString(s_begin, s_len);
+    unsigned short s_hash = hashString(s_begin, s_len);
     unsigned int s_hash_inbox = hashString_inbox(s_begin, s_len);
 	//char tmp[50], ver[2] = {s_begin[s_len-2], s_begin[s_len-1]};
     return hashTable_findToken_inputHash(tid, s_hash, s_hash_inbox);
@@ -149,7 +150,7 @@ void hashTable_pushToken(int tid, char *s_begin, int s_len) {
 	// tmp[s_len] = '\0';
 	//fprintf(stderr, "push Token: %s\n", tmp);
 
-	short s_hash = hashString(s_begin, s_len);
+	unsigned short s_hash = hashString(s_begin, s_len);
     unsigned int s_hash_inbox = hashString_inbox(s_begin, s_len);
 	if (hashTables[tid].boxes_occupied[s_hash] == 0) {
 		hashTables[tid].boxes[s_hash] = s_hash_inbox;
@@ -172,7 +173,7 @@ void hashTable_pushToken(int tid, char *s_begin, int s_len) {
 		return;
 	}
 
-	unsigned int k=0; short tmp_hash = s_hash, probe_shift = (short) (s_hash_inbox&((1<<10)-1))+1;
+	unsigned int k=0; unsigned short tmp_hash = s_hash, probe_shift = (unsigned short) (s_hash_inbox&((1<<10)-1))+1;
 	//fprintf(stderr, "\ts:%d, s_inbox:%u, shift:%d\n", s_hash, s_hash_inbox, probe_shift);
 	while (hashTables[tid].boxes_occupied[tmp_hash] == 1 && hashTables[tid].boxes[tmp_hash] != s_hash_inbox) {
 		//fprintf(stderr, "\tk=%d, probe: %d\n", k, tmp_hash);
