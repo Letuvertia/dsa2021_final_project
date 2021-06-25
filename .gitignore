@@ -10,6 +10,10 @@ malloc_test.exe
 union_inter.py
 token_analysis.py
 find_similar_main.exe
+memory_test.c
+memory_test.exe
+precompute.c
+precompute.exe
 
 test_env/
 .vscode/

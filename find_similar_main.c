@@ -41,7 +41,7 @@ short hashString(char *s_begin, int s_len) {
 	for (int s_ctr=0; s_ctr<s_len; s_ctr++){
 		hash = toNumberArray[s_begin[s_ctr]] + (hash << 6) + (hash << 16) - hash;
 	}
-	
+
 	return hash & ((1<<MOD_BIT) - 1);
 }
 
@@ -61,7 +61,6 @@ short hashString_doubleprobe(short s_hash, unsigned int s_hash_inbox, unsigned i
 	//fprintf(stderr, "second hash shift: %d\n", (s_hash + probe_shift));
 	return (s_hash + probe_shift) & ((1<<MOD_BIT) - 1);
 }
-
 
 // ref: http://www.cse.yorku.ca/~oz/hash.html
 // djb2
@@ -94,8 +93,8 @@ typedef struct HashTable {
 	//char boxes_ver[HASH_M][2];
 	//char boxes_string[HASH_M][50];
 	char boxes_occupied[HASH_M]; // check if the box is occupied
-	
-	short s_hashes[TOKENS_MAX_N]; 
+
+	short s_hashes[TOKENS_MAX_N];
 	unsigned int s_hashes_inbox[TOKENS_MAX_N];
 	//char *str_ptr[TOKENS_MAX_N];
 	//char s_ver[TOKENS_MAX_N][2];
@@ -125,32 +124,32 @@ bool hashTable_findToken_inputHash(int tid, short s_hash, unsigned int s_hash_in
 		//fprintf(stderr, "empty box: %d\n", tmp_hash);
 		return 0;
 	}
-		
-	
+
+
 	//fprintf(stderr, "match token \"%s\" with \"%s\"\n", ori_s, hashTables[tid].boxes_string[tmp_hash]);
 	return 1;
 	/*
 	if (hashTables[tid].boxes_ver[tmp_hash][0] == s_ver[0] && hashTables[tid].boxes_ver[tmp_hash][1] == s_ver[1]){
 		fprintf(stderr, "match token \"%s\" with \"%s\"\n", ori_s, hashTables[tid].boxes_string[tmp_hash]);
 		return 1;
-	}*/	
+	}*/
 }
 
 bool hashTable_findToken_inputString(int tid, char *s_begin, int s_len) {
-    short s_hash = hashString(s_begin, s_len); 
+    short s_hash = hashString(s_begin, s_len);
     unsigned int s_hash_inbox = hashString_inbox(s_begin, s_len);
 	//char tmp[50], ver[2] = {s_begin[s_len-2], s_begin[s_len-1]};
     return hashTable_findToken_inputHash(tid, s_hash, s_hash_inbox);
 }
 
 void hashTable_pushToken(int tid, char *s_begin, int s_len) {
-	char tmp[50];
-	for (int i=0; i<s_len; i++)
-		tmp[i] = s_begin[i];
-	tmp[s_len] = '\0';
+	// char tmp[50];
+	// for (int i=0; i<s_len; i++)
+	// 	tmp[i] = s_begin[i];
+	// tmp[s_len] = '\0';
 	//fprintf(stderr, "push Token: %s\n", tmp);
 
-	short s_hash = hashString(s_begin, s_len); 
+	short s_hash = hashString(s_begin, s_len);
     unsigned int s_hash_inbox = hashString_inbox(s_begin, s_len);
 	if (hashTables[tid].boxes_occupied[s_hash] == 0) {
 		hashTables[tid].boxes[s_hash] = s_hash_inbox;
@@ -163,8 +162,8 @@ void hashTable_pushToken(int tid, char *s_begin, int s_len) {
 		//hashTables[tid].s_ver[hashTables[tid].tokenN][1] = s_begin[s_len-1];
 		//hashTables[tid].str_ptr[hashTables[tid].tokenN] = hashTables[tid].boxes_string[s_hash];
 		hashTables[tid].s_hashes_inbox[hashTables[tid].tokenN++] = s_hash_inbox;
-		
-		
+
+
 		// for (int i=0; i<s_len; i++)
 		// 	hashTables[tid].boxes_string[s_hash][i] = s_begin[i];
 		// hashTables[tid].boxes_string[s_hash][s_len] = '\0';
@@ -172,7 +171,7 @@ void hashTable_pushToken(int tid, char *s_begin, int s_len) {
 		//fprintf(outputfile, "%s\n", tmp);
 		return;
 	}
-	
+
 	unsigned int k=0; short tmp_hash = s_hash, probe_shift = (short) (s_hash_inbox&((1<<10)-1))+1;
 	//fprintf(stderr, "\ts:%d, s_inbox:%u, shift:%d\n", s_hash, s_hash_inbox, probe_shift);
 	while (hashTables[tid].boxes_occupied[tmp_hash] == 1 && hashTables[tid].boxes[tmp_hash] != s_hash_inbox) {
@@ -193,8 +192,8 @@ void hashTable_pushToken(int tid, char *s_begin, int s_len) {
 		//hashTables[tid].s_ver[hashTables[tid].tokenN][1] = s_begin[s_len-1];
 		//hashTables[tid].str_ptr[hashTables[tid].tokenN] = hashTables[tid].boxes_string[tmp_hash];
 		hashTables[tid].s_hashes_inbox[hashTables[tid].tokenN++] = s_hash_inbox;
-		
-		
+
+
 		// for (int i=0; i<s_len; i++)
 		// 	hashTables[tid].boxes_string[tmp_hash][i] = s_begin[i];
 		// hashTables[tid].boxes_string[tmp_hash][s_len] = '\0';
@@ -202,7 +201,7 @@ void hashTable_pushToken(int tid, char *s_begin, int s_len) {
 		//fprintf(outputfile, "%s\n", tmp);
 		return;
 	}
-	
+
 	//fprintf(stderr, "token %s repeat with %s, whose s_inbox: %u\n", tmp, hashTables[tid].boxes_string[tmp_hash], hashTables[tid].boxes[tmp_hash]);
 }
 
@@ -241,7 +240,7 @@ int findSimilar_solve (int *ans_arr, int mid, double thres){
         //fprintf(stderr, "mail: %d\n", mail_ctr);
 		if (mail_ctr == mid)
 			continue;
-		
+
 		/*
 		fprintf(stderr, "=== MAIL %d ===\n", mid);
 		fprintf(stderr, "subject: %s\n", mails[mid].subject);
@@ -258,7 +257,7 @@ int findSimilar_solve (int *ans_arr, int mid, double thres){
 			fprintf(stderr, "%u ", hashTables[mail_ctr]->s_hashes_inChain[i]);
 		fprintf(stderr, "\n\n");
 		*/
-		
+
 
 		// compare the less token mail with the more token one
 		// 「我要叫他啟發式比較。」
@@ -272,11 +271,11 @@ int findSimilar_solve (int *ans_arr, int mid, double thres){
 		double union_count = hashTables[mid_more].tokenN;
 		double intersec_count = 0;
 		int find;
-		
+
 		for (int token_ctr=0; token_ctr < hashTables[mid_less].tokenN; token_ctr++){
 			//fprintf(stderr, "token ctr: %d\n", token_ctr);
 			//fprintf(stderr, "token hashes: %d, %u\n", hashTables[mid_less].s_hashes[token_ctr], hashTables[mid_less].s_hashes_inbox[token_ctr]);
-			//find = hashTable_findToken_inputHash(mid_more, hashTables[mid_less].s_hashes[token_ctr], hashTables[mid_less].s_hashes_inbox[token_ctr], 
+			//find = hashTable_findToken_inputHash(mid_more, hashTables[mid_less].s_hashes[token_ctr], hashTables[mid_less].s_hashes_inbox[token_ctr],
 			//			hashTables[mid_less].boxes_string[hashTables[mid_less].s_hashes[token_ctr]], hashTables[mid_less].boxes_ver[hashTables[mid_less].s_hashes[token_ctr]]);
 			//find = hashTable_findToken_inputHash(mid_more, hashTables[mid_less].s_hashes[token_ctr], hashTables[mid_less].s_hashes_inbox[token_ctr], hashTables[mid_less].str_ptr[token_ctr]);
 			find = hashTable_findToken_inputHash(mid_more, hashTables[mid_less].s_hashes[token_ctr], hashTables[mid_less].s_hashes_inbox[token_ctr]);
@@ -309,12 +308,12 @@ int main (void) {
 	// for (int i=0; i<27; i++)
 	// 	skip_mid[wrongQ_mid[i]] = 1;
 	int *ans_arr = (int *) malloc(sizeof(int)*n_mails);
-	
+
 	api.init(&n_mails, &n_queries, &mails, &queries);
 	//FILE *outFile = fopen("token.txt", "w");
 	hashTables_init();
 	//fclose(outFile); exit(-1);
-        
+
     /*
 	hashTables_init(hashTables, n_mails);
 	for (int mail_ctr = 0; mail_ctr < n_mails; mail_ctr++){
@@ -322,27 +321,27 @@ int main (void) {
         hashTable_hashmail(hashTables[mail_ctr], mails[mail_ctr]);
 	}*/
 
-	
-	
+
+
 	// DEBUG MODE OFF
 	if (!DEBUG){
 		for(int i = 0; i < n_mails; i++){
 			if (queries[i].type == find_similar){
 				// if (skip_mid[queries[i].data.find_similar_data.mid])
 				// 	continue;
-				
+
 				int ans_len = findSimilar_solve(ans_arr, queries[i].data.find_similar_data.mid, queries[i].data.find_similar_data.threshold);
 				api.answer(queries[i].id, ans_arr, ans_len);
 			}
 		}
 		free(ans_arr);
 	}
-	
-	
+
+
 	// DEBUG MODE ON
 	else{
 		char verbose = DEBUG;
-		
+
 		// 1.1 Test specified queries by QID
 		// test queries: find_similar = {5, 7, 24, 28, 30}
 		//               expression_match = {1, 4, 6, 8, 10}
@@ -355,45 +354,45 @@ int main (void) {
 		// 1.2 Test specified queries by type
 		// set -1 if you wanna test all
 		// set -2 if you wanna test by qid
-		int testAllQueries = -2;
+		int testAllQueries = find_similar;
 		if (testAllQueries >= -1)
 			testedQueries_n = n_mails;
-		
-		
+
+
 		// 2) Output the answer arr and check answer with test_env/testdata/test.ans
 		bool outputAns = 1;
 		FILE *outFile = NULL;
 		if (outputAns)
 			outFile = fopen("output.txt", "w");
 
-		
+
 		if (verbose){
 			fprintf(stderr, "==== DEBUG MODE INFO ====\n");
 			fprintf(stderr, "total received: n_mails: %d, n_queries: %d\n", n_mails, n_queries);
 			if (testAllQueries >= -1){
 				switch (testAllQueries) {
 					case expression_match:
-						fprintf(stderr, "tested query type: expression_match\n"); 
+						fprintf(stderr, "tested query type: expression_match\n");
 						break;
 					case find_similar:
-						fprintf(stderr, "tested query type: find_similar\n"); 
+						fprintf(stderr, "tested query type: find_similar\n");
 						break;
 					case group_analyse:
-						fprintf(stderr, "tested query type: group_analyse\n"); 
+						fprintf(stderr, "tested query type: group_analyse\n");
 						break;
 					case -1:
-						fprintf(stderr, "tested query type: All\n"); 
+						fprintf(stderr, "tested query type: All\n");
 						break;
 					default:
 						break;
 				}
 			}
-			
+
 			else{
 				fprintf(stderr, "tested QIDs:");
 				for (int i=0; i<testedQueries_n; i++)
 					fprintf(stderr, " %d", testedQueries[i]);
-				fprintf(stderr, "\n"); 
+				fprintf(stderr, "\n");
 			}
 			fprintf(stderr, "==== DEBUG MODE INFO END ====\n\n");
 		}
@@ -412,26 +411,26 @@ int main (void) {
 				continue;
 
             //fprintf(stderr, "qid:%d", i);
-			
+
 			if (verbose){
 				switch (queries[i].type){
 					case expression_match:
-						fprintf(stderr, "QID: %d, Reward: %lf, Type: %s\n", 
+						fprintf(stderr, "QID: %d, Reward: %lf, Type: %s\n",
 							queries[i].id, queries[i].reward, "expression_match");
 						break;
 					case find_similar:
-						fprintf(stderr, "QID: %d, Reward: %lf, Type: %s\n", 
+						fprintf(stderr, "QID: %d, Reward: %lf, Type: %s\n",
 							queries[i].id, queries[i].reward, "find_similar");
 						break;
 					case group_analyse:
-						fprintf(stderr, "QID: %d, Reward: %lf, Type: %s\n", 
+						fprintf(stderr, "QID: %d, Reward: %lf, Type: %s\n",
 							queries[i].id, queries[i].reward, "group_analyse");
 						break;
 					default:
-						fprintf(stderr, "QID: %d, Reward: %lf, Type: %s\n", 
+						fprintf(stderr, "QID: %d, Reward: %lf, Type: %s\n",
 							queries[i].id, queries[i].reward, "none of the three types. *BUGS ALERT*");
 						break;
-				}	
+				}
 			}
 
 			if (queries[i].type == find_similar){
@@ -464,6 +463,6 @@ int main (void) {
 		if (outputAns)
 			fclose(outFile);
 	}
-	
+
 	return 0;
 }
