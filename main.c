@@ -22,7 +22,7 @@ int main (void) {
 	api.init(&n_mails, &n_queries, &mails, &queries);
 	HashTable* hashTables[n_mails];
 	hashTables_init(hashTables, n_mails);
-	for (int mail_ctr = 19; mail_ctr < n_mails; mail_ctr++){
+	for (int mail_ctr = 0; mail_ctr < n_mails; mail_ctr++){
 		hashTable_hashmail(hashTables[mail_ctr], mails[mail_ctr]); exit(-1);
 	}
 	
