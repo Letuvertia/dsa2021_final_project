@@ -7,7 +7,7 @@
 
 int findSimilar_solve (int *ans_arr, HashTable* hashTables[], int mid, double thres){
 	int ans_len = 0;
-	for (int mail_ctr=19; mail_ctr < n_mails; mail_ctr++){
+	for (int mail_ctr=34; mail_ctr < n_mails; mail_ctr++){
 		if (mail_ctr == mid)
 			continue;
 		
@@ -48,6 +48,8 @@ int findSimilar_solve (int *ans_arr, HashTable* hashTables[], int mid, double th
 		for (int token_ctr=0; token_ctr < hashTable_lessToken->tokenN; token_ctr++){
 			int find = hashTable_findToken_inputHash(hashTable_moreToken, hashTable_lessToken->s_hashes[token_ctr], hashTable_lessToken->s_hashes_inChain[token_ctr]);
 			//fprintf(stderr, "check token s_hash_inChain: %u. Find: %d\n", hashTable_lessToken->s_hashes_inChain[token_ctr], find);
+			if (find)
+				fprintf(stderr, "find match \"%s\"\n", hashTable_lessToken->s_char[token_ctr]);
 
 			if (find)
 				intersec_count++;

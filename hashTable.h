@@ -157,6 +157,7 @@ typedef struct HashTable {
 	//        to avoid repeated hashing
 	int s_hashes[TOKENS_MAX_N]; 
 	unsigned int s_hashes_inChain[TOKENS_MAX_N];
+	char s_char[TOKENS_MAX_N][50];
 } HashTable;
 
 
@@ -211,17 +212,17 @@ void hashTable_hashParagraph(HashTable *hashTable, char *para) {
 
 
 void hashTable_pushToken(HashTable *hashTable, char *s_begin, int s_len) {
-	fprintf(stderr, "push Token: ");
-	for (int i=0; i<s_len; i++)
-		fprintf(stderr, "%c", s_begin[i]);
-	fprintf(stderr, "\n");
+	// fprintf(stderr, "push Token: ");
+	// for (int i=0; i<s_len; i++)
+	// 	fprintf(stderr, "%c", s_begin[i]);
+	// fprintf(stderr, "\n");
 
 	// check whether the token repeated
 	int s_hash = hashString(s_begin, s_len) % HASH_M;
 	unsigned int s_hash_inChain = hashString_inChain(s_begin, s_len);
 	for (int i=0; i<hashTable->chainElementsN[s_hash]; i++)
 		if (hashTable->chains[s_hash][i] == s_hash_inChain){
-			fprintf(stderr, "\trepeated\n");
+			//fprintf(stderr, "\trepeated\n");
 			return;
 		}
 
@@ -241,8 +242,11 @@ void hashTable_pushToken(HashTable *hashTable, char *s_begin, int s_len) {
 
 	hashTable->s_hashes[hashTable->tokenN] = s_hash;
 	hashTable->s_hashes_inChain[hashTable->tokenN] = s_hash_inChain;
+	for (int i=0; i<s_len; i++)
+		hashTable->s_char[hashTable->tokenN][i] = s_begin[i];
+	s_begin[s_len] = '\0';
 	hashTable->tokenN++;
-	fprintf(stderr, "\ttoken no.%d\n", token_pushctr); token_pushctr++;
+	//fprintf(stderr, "\ttoken no.%d\n", token_pushctr); token_pushctr++;
 }
 
 
