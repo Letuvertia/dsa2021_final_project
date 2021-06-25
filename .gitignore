@@ -1,12 +1,14 @@
 main.exe
 output.txt
 JudgeInfo.txt
+token.txt
 cmd.txt
 main_merged.c
 main_merged.exe
 malloc_test.c
 malloc_test.exe
 union_inter.py
+token_analysis.py
 find_similar_main.exe
 
 test_env/
