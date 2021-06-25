@@ -182,7 +182,9 @@ void hashTables_init(HashTable *hashTables[], int n_mails) {
 }
 
 //int max_tokenN = -1;
+int token_pushctr;
 void hashTable_hashmail(HashTable* hashTable, mail mail) {
+	token_pushctr=0;
 	hashTable_hashParagraph(hashTable, mail.subject);
 	hashTable_hashParagraph(hashTable, mail.content);
 	//max_tokenN = (max_tokenN < hashTable->tokenN)? hashTable->tokenN: max_tokenN;
@@ -192,6 +194,7 @@ void hashTable_hashmail(HashTable* hashTable, mail mail) {
 void hashTable_hashParagraph(HashTable *hashTable, char *para) {
 	// copied from "void initTokensFromString(TokenList* tokenList, char *T)" in
 	// anthony.h
+	int token_ctr=0;
 	for (int s = 0; para[s] != '\0'; s++) {
 		if ((s == 0 && isDelimiter(para[s])) || (s != 0 && !(isDelimiter(para[s-1]) && !isDelimiter(para[s]))))
 			continue;
@@ -208,17 +211,17 @@ void hashTable_hashParagraph(HashTable *hashTable, char *para) {
 
 
 void hashTable_pushToken(HashTable *hashTable, char *s_begin, int s_len) {
-	//fprintf(stderr, "push Token: ");
-	//for (int i=0; i<s_len; i++)
-	//	fprintf(stderr, "%c", s_begin[i]);
-	//fprintf(stderr, "\n");
+	fprintf(stderr, "push Token: ");
+	for (int i=0; i<s_len; i++)
+		fprintf(stderr, "%c", s_begin[i]);
+	fprintf(stderr, "\n");
 
 	// check whether the token repeated
 	int s_hash = hashString(s_begin, s_len) % HASH_M;
 	unsigned int s_hash_inChain = hashString_inChain(s_begin, s_len);
 	for (int i=0; i<hashTable->chainElementsN[s_hash]; i++)
 		if (hashTable->chains[s_hash][i] == s_hash_inChain){
-			//fprintf(stderr, "repeated\n");
+			fprintf(stderr, "\trepeated\n");
 			return;
 		}
 
@@ -239,6 +242,7 @@ void hashTable_pushToken(HashTable *hashTable, char *s_begin, int s_len) {
 	hashTable->s_hashes[hashTable->tokenN] = s_hash;
 	hashTable->s_hashes_inChain[hashTable->tokenN] = s_hash_inChain;
 	hashTable->tokenN++;
+	fprintf(stderr, "\ttoken no.%d\n", token_pushctr); token_pushctr++;
 }
 
 
