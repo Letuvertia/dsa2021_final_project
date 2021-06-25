@@ -142,7 +142,7 @@ void hashTable_pushToken(int tid, char *s_begin, int s_len) {
 	for (int i=0; i<s_len; i++)
 		tmp[i] = s_begin[i];
 	tmp[s_len] = '\0';
-	fprintf(stderr, "push Token: %s\n", tmp);
+	//fprintf(stderr, "push Token: %s\n", tmp);
 
 	short s_hash = hashString(s_begin, s_len); 
     unsigned int s_hash_inbox = hashString_inbox(s_begin, s_len);
@@ -162,7 +162,7 @@ void hashTable_pushToken(int tid, char *s_begin, int s_len) {
 		for (int i=0; i<s_len; i++)
 			hashTables[tid].boxes_string[s_hash][i] = s_begin[i];
 		hashTables[tid].boxes_string[s_hash][s_len] = '\0';
-		fprintf(stderr, "\tstored in box no.%d, not occupied; token_ctr: %d\n", s_hash, token_pushctr); token_pushctr++;
+		//fprintf(stderr, "\tstored in box no.%d, not occupied; token_ctr: %d\n", s_hash, token_pushctr); token_pushctr++;
 		//fprintf(outputfile, "%s\n", tmp);
 		return;
 	}
@@ -192,12 +192,12 @@ void hashTable_pushToken(int tid, char *s_begin, int s_len) {
 		for (int i=0; i<s_len; i++)
 			hashTables[tid].boxes_string[tmp_hash][i] = s_begin[i];
 		hashTables[tid].boxes_string[tmp_hash][s_len] = '\0';
-		fprintf(stderr, "\tstored in box no.%d, not occupied; token_ctr: %d\n", tmp_hash, token_pushctr); token_pushctr++;
+		//fprintf(stderr, "\tstored in box no.%d, not occupied; token_ctr: %d\n", tmp_hash, token_pushctr); token_pushctr++;
 		//fprintf(outputfile, "%s\n", tmp);
 		return;
 	}
 	
-	fprintf(stderr, "token %s repeat with %s, whose s_inbox: %u\n", tmp, hashTables[tid].boxes_string[tmp_hash], hashTables[tid].boxes[tmp_hash]);
+	//fprintf(stderr, "token %s repeat with %s, whose s_inbox: %u\n", tmp, hashTables[tid].boxes_string[tmp_hash], hashTables[tid].boxes[tmp_hash]);
 }
 
 void hashTable_hashParagraph(int tid, char *para) {
@@ -217,7 +217,7 @@ void hashTable_hashParagraph(int tid, char *para) {
 
 void hashTables_init() {
 	// (Jun): initialize all mails
-	for (int mail_ctr = 102; mail_ctr < n_mails; mail_ctr++) {
+	for (int mail_ctr = 0; mail_ctr < 110; mail_ctr++) {
 		//fprintf(stderr, "init mail: %d\n", mail_ctr);
 		hashTables[mail_ctr].tokenN = 0;
 		memset(hashTables[mail_ctr].boxes_occupied, 0, sizeof(char)*HASH_M);
@@ -226,13 +226,12 @@ void hashTables_init() {
 		hashTable_hashParagraph(mail_ctr, mails[mail_ctr].subject);
 		hashTable_hashParagraph(mail_ctr, mails[mail_ctr].content);
 		//fprintf(stderr, "init mail: %d, token: %d\n", mail_ctr, hashTables[mail_ctr].tokenN);
-		exit(-1);
 	}
 }
 
 int findSimilar_solve (int *ans_arr, int mid, double thres){
 	int ans_len = 0;
-	for (int mail_ctr=0; mail_ctr < n_mails; mail_ctr++){
+	for (int mail_ctr=34; mail_ctr < n_mails; mail_ctr++){
         //fprintf(stderr, "mail: %d\n", mail_ctr);
 		if (mail_ctr == mid)
 			continue;
@@ -281,12 +280,13 @@ int findSimilar_solve (int *ans_arr, int mid, double thres){
 			else
 				union_count++;
 		}
-		//fprintf(stderr, "less token id:%d, N: %d; more token id:%d, N: %d\n", mid_less, hashTables[mid_less].tokenN, mid_more, hashTables[mid_more].tokenN);
+		fprintf(stderr, "less token id:%d, N: %d; more token id:%d, N: %d\n", mid_less, hashTables[mid_less].tokenN, mid_more, hashTables[mid_more].tokenN);
 
 		double similarity = intersec_count / union_count;
-		//fprintf(stderr, "u:%lf, i:%lf, s:%lf\n", union_count, intersec_count, similarity);
+		fprintf(stderr, "u:%lf, i:%lf, s:%lf\n", union_count, intersec_count, similarity);
 		if (similarity > thres)
 			ans_arr[ans_len++] = mail_ctr;
+		break;
 	}
 
 	return ans_len;
