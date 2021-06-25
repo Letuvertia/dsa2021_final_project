@@ -74,12 +74,12 @@ int main (void) {
 		// test queries: find_similar = {5, 7, 24, 28, 30}
 		//               expression_match = {1, 4, 6, 8, 10}
 		int testedQueries_n = 1; // the # of the tested queries
-		int testedQueries[] = {702}; // the qid of the tested queries
+		int testedQueries[] = {68}; // the qid of the tested queries
 		
 		// 1.2 Test specified queries by type
 		// set -1 if you wanna test all
 		// set -2 if you wanna test by qid
-		int testAllQueries = find_similar;
+		int testAllQueries = -2;
 		if (testAllQueries >= -1)
 			testedQueries_n = n_mails;
 		

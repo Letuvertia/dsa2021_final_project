@@ -7,7 +7,7 @@
 
 int findSimilar_solve (int *ans_arr, HashTable* hashTables[], int mid, double thres){
 	int ans_len = 0;
-	for (int mail_ctr=0; mail_ctr < n_mails; mail_ctr++){
+	for (int mail_ctr=19; mail_ctr < n_mails; mail_ctr++){
 		if (mail_ctr == mid)
 			continue;
 		
@@ -56,10 +56,12 @@ int findSimilar_solve (int *ans_arr, HashTable* hashTables[], int mid, double th
 		}
 
 		double similarity = intersec_count / union_count;
-		//fprintf(stderr, "compare mail %d and mail %d. u: %lf, i:%lf, similarity: %lf\n", mid, mail_ctr, union_count, intersec_count, similarity);
+		fprintf(stderr, "compare mail %d and mail %d. u: %lf, i:%lf, similarity: %lf\n", mid, mail_ctr, union_count, intersec_count, similarity);
+		fprintf(stderr, "less token N: %d; more token N: %d\n", hashTable_lessToken->tokenN, hashTable_moreToken->tokenN);
 		if (similarity > thres)
 			ans_arr[ans_len++] = mail_ctr;
 		//fprintf(stderr, "if over thres: %d", (similarity>thres)?1:0);
+		break;
 	}
 
 	return ans_len;
